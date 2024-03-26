@@ -1,6 +1,8 @@
 package pers.zyx.shortlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
@@ -10,12 +12,12 @@ import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.dao.entity.UserDO;
 import pers.zyx.shortlink.dao.mapper.UserMapper;
 import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
+import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.UserService;
 
 import static pers.zyx.shortlink.constant.UserRedisCacheConstant.USER_REGISTER_LOCK;
-import static pers.zyx.shortlink.errorcode.UserErrorCodeEnum.USER_EXIST;
-import static pers.zyx.shortlink.errorcode.UserErrorCodeEnum.USER_SAVE_ERROR;
+import static pers.zyx.shortlink.errorcode.UserErrorCodeEnum.*;
 
 
 @Service
@@ -48,5 +50,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         } finally {
             lock.unlock();
         }
+    }
+
+    @Override
+    public UserInfoRespDTO getUserByUsername(String username) {
+        LambdaQueryWrapper<UserDO> queryWrapper = Wrappers.lambdaQuery(UserDO.class)
+                .eq(UserDO::getUsername, username);
+        UserDO userDO = baseMapper.selectOne(queryWrapper);
+        if (userDO == null) {
+            throw new ClientException(USER_NULL);
+        }
+        return BeanUtil.copyProperties(userDO, UserInfoRespDTO.class);
     }
 }

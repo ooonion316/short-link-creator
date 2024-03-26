@@ -1,9 +1,12 @@
 package pers.zyx.shortlink.controller;
 
+import cn.hutool.core.bean.BeanUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
+import pers.zyx.shortlink.dto.resp.UserActualInfoRespDTO;
+import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.UserService;
@@ -29,5 +32,14 @@ public class UserController {
     public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
         userService.register(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 根据用户名查询用户信息
+     */
+    @GetMapping("/{username}")
+    public Result<UserInfoRespDTO> getUserByUsername(@PathVariable("username") String username) {
+        UserInfoRespDTO result = userService.getUserByUsername(username);
+        return Results.success(result);
     }
 }
