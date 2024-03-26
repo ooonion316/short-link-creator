@@ -42,4 +42,14 @@ public class UserController {
         UserInfoRespDTO result = userService.getUserByUsername(username);
         return Results.success(result);
     }
+
+    /**
+     * 根据用户名查询用户真实信息
+     */
+    @GetMapping("/actual/{username}")
+    public Result<UserActualInfoRespDTO> getUserActualByUsername(@PathVariable("username") String username) {
+        UserInfoRespDTO userInfoRespDTO = userService.getUserByUsername(username);
+        UserActualInfoRespDTO result = BeanUtil.copyProperties(userInfoRespDTO, UserActualInfoRespDTO.class);
+        return Results.success(result);
+    }
 }
