@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
+import pers.zyx.shortlink.dto.req.UserUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.UserActualInfoRespDTO;
 import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
 import pers.zyx.shortlink.result.Result;
@@ -51,5 +52,14 @@ public class UserController {
         UserInfoRespDTO userInfoRespDTO = userService.getUserByUsername(username);
         UserActualInfoRespDTO result = BeanUtil.copyProperties(userInfoRespDTO, UserActualInfoRespDTO.class);
         return Results.success(result);
+    }
+
+    /**
+     * 用户信息修改
+     */
+    @PutMapping
+    public Result<Void> updateUser(@RequestBody UserUpdateReqDTO requestParam) {
+        userService.updateUser(requestParam);
+        return Results.success();
     }
 }
