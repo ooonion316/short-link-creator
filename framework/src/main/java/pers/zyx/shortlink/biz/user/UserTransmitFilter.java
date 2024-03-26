@@ -16,6 +16,7 @@ import java.util.Objects;
 /**
  * 用户过滤器
  */
+@Deprecated
 @RequiredArgsConstructor
 public class UserTransmitFilter implements Filter {
     private final StringRedisTemplate stringRedisTemplate;
