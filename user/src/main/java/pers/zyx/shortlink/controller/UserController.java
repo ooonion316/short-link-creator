@@ -3,6 +3,7 @@ package pers.zyx.shortlink.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.UserService;
@@ -19,5 +20,14 @@ public class UserController {
     @GetMapping("/has-username")
     public Result<Boolean> hasUsername(@RequestParam("username") String username) {
         return Results.success(userService.hasUsername(username));
+    }
+
+    /**
+     * 注册用户
+     */
+    @PostMapping
+    public Result<Void> register(@RequestBody UserRegisterReqDTO requestParam) {
+        userService.register(requestParam);
+        return Results.success();
     }
 }
