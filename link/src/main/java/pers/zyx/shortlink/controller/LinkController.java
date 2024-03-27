@@ -2,17 +2,17 @@ package pers.zyx.shortlink.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.LinkService;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,5 +36,13 @@ public class LinkController {
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         IPage<ShortLinkPageRespDTO> result = linkService.pageShortLink(requestParam);
         return Results.success(result);
+    }
+
+    /**
+     * 统计各个分组的短链接数量
+     */
+    @GetMapping("/api/short-link/v1/count")
+    public Result<List<ShortLinkGroupCountRespDTO>> countGroupShortLink(@RequestParam("gids") List<String> gids) {
+        return Results.success(linkService.countGroupShortLink(gids));
     }
 }

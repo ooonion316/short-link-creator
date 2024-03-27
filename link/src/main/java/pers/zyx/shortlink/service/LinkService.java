@@ -6,7 +6,10 @@ import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
+
+import java.util.List;
 
 public interface LinkService extends IService<LinkDO> {
     /**
@@ -25,4 +28,12 @@ public interface LinkService extends IService<LinkDO> {
      * @return 指定分组下所有短链接
      */
     IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam);
+
+    /**
+     * 统计各个分组的短链接数量
+     *
+     * @param gids 分组id
+     * @return 各个分组短链接数量
+     */
+    List<ShortLinkGroupCountRespDTO> countGroupShortLink(List<String> gids);
 }

@@ -2,6 +2,7 @@ package pers.zyx.shortlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -15,10 +16,14 @@ import pers.zyx.shortlink.dao.mapper.LinkMapper;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.LinkService;
 import pers.zyx.shortlink.util.HashUtil;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -59,6 +64,17 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .eq(LinkDO::getEnableStatus, 0);
         IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
         return resultPage.convert(each ->BeanUtil.toBean(each, ShortLinkPageRespDTO.class));
+    }
+
+    @Override
+    public List<ShortLinkGroupCountRespDTO> countGroupShortLink(List<String> gids) {
+        QueryWrapper<LinkDO> queryWrapper = Wrappers.query(new LinkDO())
+                .select("gid as gid, count(*) as shortLinkCount")
+                .in("gid", gids)
+                .eq("enable_status", 0)
+                .groupBy("gid");
+        List<Map<String, Object>> maps = baseMapper.selectMaps(queryWrapper);
+        return BeanUtil.copyToList(maps, ShortLinkGroupCountRespDTO.class);
     }
 
     public String generateSuffix(String domain, String originUrl) {
