@@ -8,17 +8,20 @@ import lombok.Data;
 @Data
 public class GroupListRespDTO {
     /**
-     * 分组id
+     * 分组 id
      */
     private String gid;
+
     /**
      * 分组名
      */
     private String name;
+
     /**
      * 用户名
      */
     private String username;
+
     /**
      * 分组排序
      */

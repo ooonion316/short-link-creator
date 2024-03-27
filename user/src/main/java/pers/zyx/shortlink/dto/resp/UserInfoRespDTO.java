@@ -10,7 +10,7 @@ import pers.zyx.shortlink.util.PhoneDesensitizationSerializer;
 @Data
 public class UserInfoRespDTO {
     /**
-     * Id
+     * id
      */
     private Long id;
 
