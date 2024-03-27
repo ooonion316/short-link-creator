@@ -3,7 +3,7 @@ package pers.zyx.shortlink.dto.req;
 import lombok.Data;
 
 /**
- * 排序短链接分组
+ * 排序短链接分组请求参数
  */
 @Data
 public class GroupSortReqDTO {
