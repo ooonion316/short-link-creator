@@ -26,6 +26,7 @@ import pers.zyx.shortlink.service.UserService;
 
 import java.util.concurrent.TimeUnit;
 
+import static pers.zyx.shortlink.constant.UserRedisCacheConstant.USER_LOGIN_PREFIX;
 import static pers.zyx.shortlink.constant.UserRedisCacheConstant.USER_REGISTER_LOCK;
 import static pers.zyx.shortlink.errorcode.UserErrorCodeEnum.*;
 
@@ -37,7 +38,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterBloomFilter;
     private final RedissonClient redissonClient;
 
-    private static final String USER_LOGIN_PREFIX = "short-link:logged_in:";
+
 
     @Override
     public Boolean hasUsername(String username) {
@@ -113,5 +114,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     @Override
     public Boolean checkLogin(String username, String token) {
         return stringRedisTemplate.opsForHash().get(USER_LOGIN_PREFIX + username, token) != null;
+    }
+
+    @Override
+    public void logout(String username, String token) {
+        if (!checkLogin(username, token)) {
+            throw new ClientException(USER_NULL);
+        }
+        stringRedisTemplate.delete(USER_LOGIN_PREFIX + username);
     }
 }
