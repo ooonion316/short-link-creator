@@ -3,6 +3,7 @@ package pers.zyx.shortlink.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.req.GroupSortReqDTO;
 import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 
@@ -36,4 +37,11 @@ public interface GroupService extends IService<GroupDO> {
      * @param gid 分组 id
      */
     void removeGroup(String gid);
+
+    /**
+     * 短链接分组排序
+     *
+     * @param requestParam 分组排序请求参数
+     */
+    void sortGroup(List<GroupSortReqDTO> requestParam);
 }
