@@ -2,9 +2,11 @@ package pers.zyx.shortlink.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import pers.zyx.shortlink.dao.entity.UserDO;
+import pers.zyx.shortlink.dto.req.UserLoginReqDTO;
 import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
 import pers.zyx.shortlink.dto.req.UserUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
+import pers.zyx.shortlink.dto.resp.UserLoginRespDTO;
 
 public interface UserService extends IService<UserDO> {
     /**
@@ -36,4 +38,12 @@ public interface UserService extends IService<UserDO> {
      * @param requestParam 用户信息修改请求参数
      */
     void updateUser(UserUpdateReqDTO requestParam);
+
+    /**
+     * 用户登录
+     *
+     * @param requestParam 用户登录请求参数
+     * @return 用户 Token
+     */
+    UserLoginRespDTO login(UserLoginReqDTO requestParam);
 }

@@ -4,10 +4,12 @@ import cn.hutool.core.bean.BeanUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import pers.zyx.shortlink.dto.req.UserLoginReqDTO;
 import pers.zyx.shortlink.dto.req.UserRegisterReqDTO;
 import pers.zyx.shortlink.dto.req.UserUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.UserActualInfoRespDTO;
 import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
+import pers.zyx.shortlink.dto.resp.UserLoginRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.UserService;
@@ -61,5 +63,14 @@ public class UserController {
     public Result<Void> updateUser(@RequestBody UserUpdateReqDTO requestParam) {
         userService.updateUser(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 用户登陆
+     */
+    @PostMapping("/login")
+    public Result<UserLoginRespDTO> login(@RequestBody UserLoginReqDTO requestParam) {
+        UserLoginRespDTO result = userService.login(requestParam);
+        return Results.success(result);
     }
 }
