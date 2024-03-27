@@ -3,6 +3,7 @@ package pers.zyx.shortlink.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import pers.zyx.shortlink.biz.user.UserContext;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dao.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 import pers.zyx.shortlink.service.GroupService;
 
@@ -37,6 +39,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(lambdaQueryWrapper);
         return BeanUtil.copyToList(groupDOList, GroupListRespDTO.class);
+    }
+
+    @Override
+    public void updateGroup(GroupUpdateReqDTO requestParam) {
+        LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                .eq(GroupDO::getGid, requestParam.getGid())
+                .eq(GroupDO::getName, requestParam.getName());
+        GroupDO groupDO = GroupDO.builder()
+                .name(requestParam.getName())
+                .build();
+        baseMapper.update(groupDO, updateWrapper);
     }
 
     public boolean hasGid(String gid) {

@@ -3,6 +3,7 @@ package pers.zyx.shortlink.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 
 import java.util.List;
@@ -21,4 +22,11 @@ public interface GroupService extends IService<GroupDO> {
      * @return 短链接分组信息
      */
     List<GroupListRespDTO> listGroup();
+
+    /**
+     * 更新短链接分组
+     *
+     * @param requestParam 更新参数
+     */
+    void updateGroup(GroupUpdateReqDTO requestParam);
 }

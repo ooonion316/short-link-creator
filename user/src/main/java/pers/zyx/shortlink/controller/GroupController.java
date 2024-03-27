@@ -3,6 +3,7 @@ package pers.zyx.shortlink.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
@@ -31,5 +32,14 @@ public class GroupController {
     @GetMapping
     public Result<List<GroupListRespDTO>> listGroup() {
         return Results.success(groupService.listGroup());
+    }
+
+    /**
+     * 更新短链接分组
+     */
+    @PutMapping
+    public Result<Void> updateGroup(@RequestBody GroupUpdateReqDTO requestParam) {
+        groupService.updateGroup(requestParam);
+        return Results.success();
     }
 }
