@@ -37,7 +37,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterBloomFilter;
     private final RedissonClient redissonClient;
 
-    private static final String USER_LOGIN_PREFIX = "short-link:login_";
+    private static final String USER_LOGIN_PREFIX = "short-link:logged_in:";
 
     @Override
     public Boolean hasUsername(String username) {
@@ -108,5 +108,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
         stringRedisTemplate.expire(USER_LOGIN_PREFIX + requestParam.getUsername(), 30L, TimeUnit.DAYS); // TODO 测试用, 上线后改为30分钟
 
         return new UserLoginRespDTO(token);
+    }
+
+    @Override
+    public Boolean checkLogin(String username, String token) {
+        return stringRedisTemplate.opsForHash().get(USER_LOGIN_PREFIX + username, token) != null;
     }
 }

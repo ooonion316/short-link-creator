@@ -73,4 +73,13 @@ public class UserController {
         UserLoginRespDTO result = userService.login(requestParam);
         return Results.success(result);
     }
+
+    /**
+     * 检测用户是否登陆
+     */
+    @GetMapping("/check-login")
+    public Result<Boolean> checkLogin(@RequestParam("username") String username, @RequestParam("token") String token) {
+        Boolean isLogin = userService.checkLogin(username, token);
+        return Results.success(isLogin);
+    }
 }
