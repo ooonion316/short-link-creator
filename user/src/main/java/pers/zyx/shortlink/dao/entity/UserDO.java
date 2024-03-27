@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import pers.zyx.shortlink.dao.BaseDO;
 
+/**
+ * 用户实体
+ */
 @Data
 @Builder
 @NoArgsConstructor
