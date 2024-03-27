@@ -9,6 +9,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 import pers.zyx.shortlink.exception.ClientException;
+import pers.zyx.shortlink.result.Results;
 
 import java.util.Arrays;
 import java.util.List;
@@ -33,7 +34,7 @@ public class UserInterception implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         String method = request.getMethod();
         String requestURI = request.getRequestURI();
-        for (int i = 0; i < method.length(); i++) {
+        for (int i = 0; i < EXCLUDE_URLS.size(); i++) {
             if ((StrUtil.equals(method, EXCLUDE_METHODS.get(i))) && (StrUtil.equals(requestURI, EXCLUDE_URLS.get(i)))) {
                 return true;
             }
@@ -52,6 +53,7 @@ public class UserInterception implements HandlerInterceptor {
             UserContext.setUser(userInfoDTO);
         } else {
             response.setStatus(401);
+            return false;
         }
         return true;
     }
