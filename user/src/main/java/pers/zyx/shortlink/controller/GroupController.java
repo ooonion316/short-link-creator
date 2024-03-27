@@ -1,14 +1,14 @@
 package pers.zyx.shortlink.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.GroupService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/short-link/admin/v1/group")
@@ -23,5 +23,13 @@ public class GroupController {
     public Result<Void> saveGroup(@RequestBody GroupSaveReqDTO requestParam) {
         groupService.saveGroup(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 查询短链接分组
+     */
+    @GetMapping
+    public Result<List<GroupListRespDTO>> listGroup() {
+        return Results.success(groupService.listGroup());
     }
 }

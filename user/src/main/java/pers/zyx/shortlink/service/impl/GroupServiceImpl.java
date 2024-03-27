@@ -1,5 +1,6 @@
 package pers.zyx.shortlink.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -9,7 +10,10 @@ import pers.zyx.shortlink.biz.user.UserContext;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dao.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
+import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 import pers.zyx.shortlink.service.GroupService;
+
+import java.util.List;
 
 @Service
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
@@ -24,6 +28,15 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .username(UserContext.getUsername())
                 .build();
         baseMapper.insert(groupDO);
+    }
+
+    @Override
+    public List<GroupListRespDTO> listGroup() {
+        LambdaQueryWrapper<GroupDO> lambdaQueryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
+        List<GroupDO> groupDOList = baseMapper.selectList(lambdaQueryWrapper);
+        return BeanUtil.copyToList(groupDOList, GroupListRespDTO.class);
     }
 
     public boolean hasGid(String gid) {
