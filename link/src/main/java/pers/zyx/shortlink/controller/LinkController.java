@@ -1,5 +1,6 @@
 package pers.zyx.shortlink.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.LinkService;
@@ -23,6 +25,16 @@ public class LinkController {
     @PostMapping("/api/short-link/v1/create")
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         ShortLinkCreateRespDTO result = linkService.createShortLink(requestParam);
+        return Results.success(result);
+    }
+
+
+    /**
+     * 查询指定分组下的所有短链接
+     */
+    @GetMapping("/api/short-link/v1/page")
+    public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
+        IPage<ShortLinkPageRespDTO> result = linkService.pageShortLink(requestParam);
         return Results.success(result);
     }
 }

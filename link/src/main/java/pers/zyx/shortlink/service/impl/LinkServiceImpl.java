@@ -1,6 +1,9 @@
 package pers.zyx.shortlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,7 +13,9 @@ import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dao.mapper.LinkMapper;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
+import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.LinkService;
 import pers.zyx.shortlink.util.HashUtil;
@@ -45,6 +50,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 .originUrl(linkDO.getOriginUrl())
                 .gid(linkDO.getGid())
                 .build();
+    }
+
+    @Override
+    public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkPageReqDTO requestParam) {
+        LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getGid, requestParam.getGid())
+                .eq(LinkDO::getEnableStatus, 0);
+        IPage<LinkDO> resultPage = baseMapper.selectPage(requestParam, queryWrapper);
+        return resultPage.convert(each ->BeanUtil.toBean(each, ShortLinkPageRespDTO.class));
     }
 
     public String generateSuffix(String domain, String originUrl) {
