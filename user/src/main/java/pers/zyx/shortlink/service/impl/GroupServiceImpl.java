@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.biz.user.UserContext;
+import pers.zyx.shortlink.dao.BaseDO;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dao.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSaveReqDTO;
@@ -49,6 +50,17 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         GroupDO groupDO = GroupDO.builder()
                 .name(requestParam.getName())
                 .build();
+        baseMapper.update(groupDO, updateWrapper);
+    }
+
+    @Override
+    public void removeGroup(String gid) {
+        LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
+                .eq(GroupDO::getUsername, UserContext.getUsername())
+                .eq(GroupDO::getGid, gid)
+                .set(BaseDO::getDelFlag, 1);
+        GroupDO groupDO = new GroupDO();
+        groupDO.setDelFlag(1);
         baseMapper.update(groupDO, updateWrapper);
     }
 
