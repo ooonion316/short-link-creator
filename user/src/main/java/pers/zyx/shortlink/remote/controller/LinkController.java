@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkPageReqDTO;
+import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.remote.service.LinkRemoteService;
 import pers.zyx.shortlink.result.Result;
+import pers.zyx.shortlink.result.Results;
 
 /**
  * 链接中台调用, 后期使用 SpringCloud 代替
@@ -34,5 +36,14 @@ public class LinkController {
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return linkRemoteService.pageShortLink(requestParam);
+    }
+
+    /**
+     * 更新短链接
+     */
+    @PostMapping("/api/short-link/admin/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+        linkRemoteService.updateShortLink(requestParam);
+        return Results.success();
     }
 }
