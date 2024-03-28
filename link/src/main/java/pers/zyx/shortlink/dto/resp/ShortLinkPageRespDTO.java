@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 /**
  * 短链接分页返回参数
@@ -49,7 +50,7 @@ public class ShortLinkPageRespDTO {
      * 有效期
      */
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime validDate;
+    private Date validDate;
 
     /**
      * 网站标识

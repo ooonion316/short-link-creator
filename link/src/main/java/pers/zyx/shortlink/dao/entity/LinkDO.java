@@ -1,6 +1,5 @@
 package pers.zyx.shortlink.dao.entity;
 
-import com.baomidou.mybatisplus.annotation.FieldFill;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
@@ -10,6 +9,7 @@ import lombok.NoArgsConstructor;
 import pers.zyx.shortlink.dao.BaseDO;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @Builder
@@ -70,7 +70,7 @@ public class LinkDO extends BaseDO {
     /**
      * 有效期
      */
-    private LocalDateTime validDate;
+    private Date validDate;
 
     /**
      * 网站标识
