@@ -13,6 +13,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -35,6 +38,8 @@ import pers.zyx.shortlink.service.LinkService;
 import pers.zyx.shortlink.util.HashUtil;
 import pers.zyx.shortlink.util.LinkUtil;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -120,7 +125,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         LinkDO linkDO = LinkDO.builder()
                 .gid(hasShortLinkDO.getGid())
                 .domain(hasShortLinkDO.getDomain())
-                .favicon(hasShortLinkDO.getFavicon())
+                .favicon(getFavicon(requestParam.getOriginUrl()))
                 .shortUri(hasShortLinkDO.getShortUri())
                 .clickNum(hasShortLinkDO.getClickNum())
                 .createdType(hasShortLinkDO.getCreatedType())
@@ -241,5 +246,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             if (!shortLinkBloomFilter.contains(domain + "/" + suffix)) break;;
         }
         return suffix;
+    }
+
+    @SneakyThrows
+    public String getFavicon(String url) {
+        URL targetUrl = new URL(url);
+        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+        int responseCode = connection.getResponseCode();
+        if (responseCode == HttpURLConnection.HTTP_OK) {
+            Document document = Jsoup.connect(url).get();
+            Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon").first();
+            if (faviconLink != null) return faviconLink.attr("abs:href");
+        }
+        return null;
     }
 }
