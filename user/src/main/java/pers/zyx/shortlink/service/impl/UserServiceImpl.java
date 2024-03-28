@@ -13,6 +13,7 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pers.zyx.shortlink.biz.user.UserContext;
 import pers.zyx.shortlink.dao.entity.UserDO;
 import pers.zyx.shortlink.dao.mapper.UserMapper;
@@ -22,6 +23,7 @@ import pers.zyx.shortlink.dto.req.UserUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.UserInfoRespDTO;
 import pers.zyx.shortlink.dto.resp.UserLoginRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
+import pers.zyx.shortlink.service.GroupService;
 import pers.zyx.shortlink.service.UserService;
 
 import java.util.concurrent.TimeUnit;
@@ -38,6 +40,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     private final RBloomFilter<String> userRegisterBloomFilter;
     private final RedissonClient redissonClient;
 
+    private final GroupService groupService;
+
 
 
     @Override
@@ -46,6 +50,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void register(UserRegisterReqDTO requestParam) {
         if (hasUsername(requestParam.getUsername())) {
             throw new ClientException(USER_EXIST);
@@ -57,6 +62,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
                 if (insert < 1) {
                     throw new ClientException(USER_SAVE_ERROR);
                 }
+                groupService.saveGroup(requestParam.getUsername(), "默认分组");
                 userRegisterBloomFilter.add(requestParam.getUsername());
             } else {
                 throw new ClientException(USER_EXIST);
