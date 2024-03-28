@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
+import pers.zyx.shortlink.dto.req.ShortLinkUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
@@ -36,4 +37,12 @@ public interface LinkService extends IService<LinkDO> {
      * @return 各个分组短链接数量
      */
     List<ShortLinkGroupCountRespDTO> countGroupShortLink(List<String> gids);
+
+    /**
+     * 更新短链接
+     *
+     * @param requestParam 更新参数
+     * @return 更新后信息
+     */
+    void updateShortLink(ShortLinkUpdateReqDTO requestParam);
 }

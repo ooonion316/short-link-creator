@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
+import pers.zyx.shortlink.dto.req.ShortLinkUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
@@ -44,5 +45,14 @@ public class LinkController {
     @GetMapping("/api/short-link/v1/count")
     public Result<List<ShortLinkGroupCountRespDTO>> countGroupShortLink(@RequestParam("gids") List<String> gids) {
         return Results.success(linkService.countGroupShortLink(gids));
+    }
+
+    /**
+     * 更新短链接
+     */
+    @PostMapping("/api/short-link/v1/update")
+    public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
+        linkService.updateShortLink(requestParam);
+        return Results.success();
     }
 }
