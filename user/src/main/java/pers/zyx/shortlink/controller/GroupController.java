@@ -23,7 +23,7 @@ public class GroupController {
      */
     @PostMapping
     public Result<Void> saveGroup(@RequestBody GroupSaveReqDTO requestParam) {
-        groupService.saveGroup(requestParam);
+        groupService.saveGroup(requestParam.getName());
         return Results.success();
     }
 
