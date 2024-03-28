@@ -4,6 +4,7 @@ import cn.hutool.http.HttpUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import org.springframework.web.bind.annotation.RequestParam;
 import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
@@ -40,5 +41,16 @@ public interface LinkRemoteService {
      */
     default void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
         HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/update", JSON.toJSONString(requestParam));
+    }
+
+    /**
+     * 根据 URL 获取网站标题
+     *
+     * @param url 网站地址
+     * @return 网站标题
+     */
+    default Result<String> getTitleByUrl(@RequestParam("url") String url) {
+        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url=" + url);
+        return JSON.parseObject(resultPageStr, new TypeReference<>() {});
     }
 }
