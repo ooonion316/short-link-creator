@@ -14,6 +14,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.zyx.shortlink.dao.entity.LinkDO;
+import pers.zyx.shortlink.dao.entity.LinkGotoDO;
+import pers.zyx.shortlink.dao.mapper.LinkGotoMapper;
 import pers.zyx.shortlink.dao.mapper.LinkMapper;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
@@ -37,6 +39,7 @@ import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.PERMANENT;
 @RequiredArgsConstructor
 public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements LinkService {
     private final RBloomFilter<String> shortLinkBloomFilter;
+    private final LinkGotoMapper linkGotoMapper;
 
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
@@ -49,9 +52,14 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
+        LinkGotoDO linkGotoDO = LinkGotoDO.builder()
+                .gid(requestParam.getGid())
+                .fullShortUrl(fullShortUrl)
+                .build();
 
         try {
             baseMapper.insert(linkDO);
+            linkGotoMapper.insert(linkGotoDO);
         } catch (DuplicateKeyException ex) {
             log.warn("短链接 {} 重复入库", fullShortUrl);
         }
