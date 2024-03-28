@@ -5,6 +5,11 @@ package pers.zyx.shortlink.constant;
  */
 public class LinkEnableStatusConstant {
     /**
+     * 短链接缓存默认有效时间
+     */
+    public static final long DEFAULT_CACHE_VALID_TIME = 2626560000L;
+
+    /**
      * 已启用
      */
     public static final Integer ENABLE = 0;
