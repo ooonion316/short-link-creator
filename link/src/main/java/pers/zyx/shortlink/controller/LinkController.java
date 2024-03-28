@@ -1,6 +1,8 @@
 package pers.zyx.shortlink.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
@@ -54,5 +56,13 @@ public class LinkController {
     public Result<Void> updateShortLink(@RequestBody ShortLinkUpdateReqDTO requestParam) {
         linkService.updateShortLink(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 短链接跳转
+     */
+    @GetMapping("/{short-uri}")
+    public void restoreUrl(@PathVariable("short-uri") String shortUri, HttpServletRequest request, HttpServletResponse response) {
+        linkService.restoreUri(shortUri, request, response);
     }
 }

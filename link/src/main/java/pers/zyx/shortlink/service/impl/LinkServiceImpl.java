@@ -7,10 +7,17 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.util.Strings;
 import org.redisson.api.RBloomFilter;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pers.zyx.shortlink.dao.entity.LinkDO;
@@ -26,19 +33,25 @@ import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.LinkService;
 import pers.zyx.shortlink.util.HashUtil;
+import pers.zyx.shortlink.util.LinkUtil;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.ENABLE;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.PERMANENT;
+import static pers.zyx.shortlink.constant.LinkGotoConstant.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements LinkService {
     private final RBloomFilter<String> shortLinkBloomFilter;
+    private final StringRedisTemplate stringRedisTemplate;
+    private final RedissonClient redissonClient;
     private final LinkGotoMapper linkGotoMapper;
 
     @Override
@@ -133,6 +146,90 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             linkDO.setGid(requestParam.getGid());
             baseMapper.delete(deleteWrapper);
             baseMapper.insert(linkDO);
+        }
+    }
+
+    @Override
+    @SneakyThrows
+    public void restoreUri(String shortUri, HttpServletRequest request, HttpServletResponse response) {
+        String scheme = request.getScheme();
+        String serverName = request.getServerName();
+        String fullShortUrl = scheme + "://" + serverName + "/" + shortUri;
+
+        // 判断布隆过滤器
+        if (!shortLinkBloomFilter.contains(fullShortUrl)) {
+            response.sendRedirect("/page/notfound");
+            return;
+        }
+
+        // 尝试从 Redis 中获取原始链接
+        String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK, fullShortUrl));
+        if (Strings.isNotBlank(originLink)) {
+            response.sendRedirect(originLink);
+            return;
+        }
+
+        // Redis 中不存在, 尝试重建索引
+        RLock lock = redissonClient.getLock(String.format(GOTO_SHORT_LINK_LOCK, fullShortUrl));
+        lock.lock();
+        try {
+            // 双重判定锁
+            originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK, fullShortUrl));
+            if (Strings.isNotBlank(originLink)) {
+                response.sendRedirect(originLink);
+                return;
+            }
+
+            // 短链接为空值, 直接返回 notfound
+            String gotoIsNull = stringRedisTemplate.opsForValue().get(String.format(GOTO_IS_NULL_SHORT_LINK, fullShortUrl));
+            if (Strings.isNotBlank(gotoIsNull)) {
+                response.sendRedirect("/page/notfound");
+                return;
+            }
+
+            // 在 goto 表中查询, 如果没查到缓存空值
+            LambdaQueryWrapper<LinkGotoDO> gotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                    .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+            LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(gotoQueryWrapper);
+            if (linkGotoDO == null) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK, fullShortUrl), "null", 30L, TimeUnit.SECONDS);
+                response.sendRedirect("/page/notfound");
+                return;
+            }
+
+            LambdaQueryWrapper<LinkDO> linkQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                    .eq(LinkDO::getEnableStatus, ENABLE)
+                    .eq(LinkDO::getGid, linkGotoDO.getGid())
+                    .eq(LinkDO::getFullShortUrl, fullShortUrl);
+            LinkDO linkDO = baseMapper.selectOne(linkQueryWrapper);
+            if (linkDO == null || (linkDO.getValidDate() != null && linkDO.getValidDate().before(new Date()))) {
+                stringRedisTemplate.opsForValue().set(String.format(GOTO_IS_NULL_SHORT_LINK, fullShortUrl), "null", 30L, TimeUnit.SECONDS);
+                response.sendRedirect("/page/notfound");
+                return;
+            }
+
+            // 重建缓存
+            stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK, fullShortUrl), linkDO.getOriginUrl(),
+                    LinkUtil.getLinkCacheValidDate(linkDO.getValidDate()), TimeUnit.MILLISECONDS);
+            response.sendRedirect(linkDO.getOriginUrl());
+        } finally {
+            lock.unlock();
+        }
+
+        LambdaQueryWrapper<LinkGotoDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+        LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(linkGotoQueryWrapper);
+        if (linkGotoDO == null) {
+            // TODO 可能是恶意访问, 进行风控
+        }
+
+        LambdaQueryWrapper<LinkDO> linkQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
+                .eq(LinkDO::getEnableStatus, ENABLE)
+                .eq(LinkDO::getGid, linkGotoDO.getGid())
+                .eq(LinkDO::getFullShortUrl, linkGotoDO.getFullShortUrl());
+        LinkDO linkDO = baseMapper.selectOne(linkQueryWrapper);
+        if (linkDO != null) {
+                response.sendRedirect(linkDO.getOriginUrl());
         }
     }
 

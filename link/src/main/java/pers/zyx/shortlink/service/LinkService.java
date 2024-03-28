@@ -2,6 +2,8 @@ package pers.zyx.shortlink.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
@@ -45,4 +47,13 @@ public interface LinkService extends IService<LinkDO> {
      * @return 更新后信息
      */
     void updateShortLink(ShortLinkUpdateReqDTO requestParam);
+
+    /**
+     * 短链接跳转
+     *
+     * @param shortUri  短链接后缀
+     * @param request   请求
+     * @param response  响应
+     */
+    void restoreUri(String shortUri, HttpServletRequest request, HttpServletResponse response);
 }
