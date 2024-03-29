@@ -14,8 +14,8 @@ import pers.zyx.shortlink.dto.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.SaveRecycleBinReqDTO;
 import pers.zyx.shortlink.service.RecycleBinService;
 
-import static pers.zyx.shortlink.constant.LinkGotoConstant.GOTO_IS_NULL_SHORT_LINK;
-import static pers.zyx.shortlink.constant.LinkGotoConstant.GOTO_SHORT_LINK;
+import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.GOTO_IS_NULL_SHORT_LINK;
+import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.GOTO_SHORT_LINK;
 
 
 @Service

@@ -1,9 +1,9 @@
 package pers.zyx.shortlink.constant;
 
 /**
- * 用户模块 Redis 缓存常量
+ * 用户模块 Redis 前缀
  */
-public class UserRedisCacheConstant {
+public class UserRedisKeyConstant {
     /**
      * 用户注册锁前缀
      */

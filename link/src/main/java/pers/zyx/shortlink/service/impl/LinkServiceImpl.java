@@ -48,7 +48,7 @@ import java.util.concurrent.TimeUnit;
 
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.ENABLE;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.PERMANENT;
-import static pers.zyx.shortlink.constant.LinkGotoConstant.*;
+import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.*;
 
 @Slf4j
 @Service

@@ -1,9 +1,9 @@
 package pers.zyx.shortlink.constant;
 
 /**
- * 短链接跳转常量
+ * 短链接跳转 Redis 前缀
  */
-public class LinkGotoConstant {
+public class LinkGotoRedisKeyConstant {
     /**
      * 短链接正常跳转
      */

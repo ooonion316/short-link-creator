@@ -28,8 +28,8 @@ import pers.zyx.shortlink.service.UserService;
 
 import java.util.concurrent.TimeUnit;
 
-import static pers.zyx.shortlink.constant.UserRedisCacheConstant.USER_LOGIN_PREFIX;
-import static pers.zyx.shortlink.constant.UserRedisCacheConstant.USER_REGISTER_LOCK;
+import static pers.zyx.shortlink.constant.UserRedisKeyConstant.USER_LOGIN_PREFIX;
+import static pers.zyx.shortlink.constant.UserRedisKeyConstant.USER_REGISTER_LOCK;
 import static pers.zyx.shortlink.errorcode.UserErrorCodeEnum.*;
 
 

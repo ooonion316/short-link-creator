@@ -22,7 +22,7 @@ import pers.zyx.shortlink.service.GroupService;
 import java.util.List;
 import java.util.Optional;
 
-import static pers.zyx.shortlink.constant.UserRedisCacheConstant.GROUP_CREATE_LOCK;
+import static pers.zyx.shortlink.constant.UserRedisKeyConstant.GROUP_CREATE_LOCK;
 
 @Service
 @RequiredArgsConstructor
