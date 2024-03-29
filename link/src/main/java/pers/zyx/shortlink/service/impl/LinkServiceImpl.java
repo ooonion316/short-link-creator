@@ -70,6 +70,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
     private final LinkOsStatsMapper linkOsStatsMapper;
+    private final LinkBrowserStatsMapper linkBrowserStatsMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocalAmapKey;
@@ -330,6 +331,16 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .date(date)
                     .build();
             linkOsStatsMapper.shortLinkOsState(linkOsStatsDO);
+
+            // Browser stats
+            LinkBrowserStatsDO linkBrowserStatsDO = LinkBrowserStatsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .browser(LinkUtil.getBrowser(request))
+                    .gid(gid)
+                    .cnt(1)
+                    .date(date)
+                    .build();
+            linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDO);
         } catch (Throwable ex) {
             log.error("短链接访问统计异常", ex);
         }
