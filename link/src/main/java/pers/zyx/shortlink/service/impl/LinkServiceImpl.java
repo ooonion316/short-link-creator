@@ -69,6 +69,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkAccessStatsMapper linkAccessStatsMapper;
 
     @Override
+    @Transactional
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
         String suffix = generateSuffix(requestParam.getDomain(), requestParam.getOriginUrl());
         if (suffix == "") throw new ClientException("访问人数过多, 请稍后再试");
