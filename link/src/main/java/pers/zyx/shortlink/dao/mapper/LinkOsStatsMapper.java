@@ -9,7 +9,7 @@ import pers.zyx.shortlink.dao.entity.LinkOsStatsDO;
 @Mapper
 public interface LinkOsStatsMapper extends BaseMapper<LinkOsStatsDO> {
     /**
-     * 记录地区访问监控数据
+     * 记录操作系统访问统计数据
      */
     @Insert("""
             INSERT INTO t_link_os_stats (full_short_url, gid, date, cnt, os, create_time, update_time, del_flag)

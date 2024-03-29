@@ -9,7 +9,7 @@ import pers.zyx.shortlink.dao.entity.LinkLocaleStatsDO;
 @Mapper
 public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
     /**
-     * 记录地区访问监控数据
+     * 记录地区访问统计数据
      */
     @Insert("""
             INSERT INTO t_link_locale_stats (full_short_url, gid, date, cnt, country, province, city, adcode, create_time, update_time, del_flag)
