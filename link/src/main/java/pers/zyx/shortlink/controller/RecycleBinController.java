@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pers.zyx.shortlink.dto.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.SaveRecycleBinReqDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
@@ -22,6 +23,15 @@ public class RecycleBinController {
     @PostMapping("/save")
     public Result<Void> SaveRecycleBin(@RequestBody SaveRecycleBinReqDTO requestParam) {
         recycleBinService.saveRecycleBin(requestParam);
+        return Results.success();
+    }
+
+    /**
+     * 将短链接移出回收站
+     */
+    @PostMapping("/recover")
+    public Result<Void> recoverRecycleBin(@RequestBody RecoverRecycleBinReqDTO requestParam) {
+        recycleBinService.recoverRecycleBin(requestParam);
         return Results.success();
     }
 }

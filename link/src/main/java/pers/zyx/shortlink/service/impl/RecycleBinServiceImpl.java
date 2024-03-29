@@ -9,9 +9,11 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dao.mapper.RecycleBinMapper;
+import pers.zyx.shortlink.dto.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.SaveRecycleBinReqDTO;
 import pers.zyx.shortlink.service.RecycleBinService;
 
+import static pers.zyx.shortlink.constant.LinkGotoConstant.GOTO_IS_NULL_SHORT_LINK;
 import static pers.zyx.shortlink.constant.LinkGotoConstant.GOTO_SHORT_LINK;
 
 
@@ -33,5 +35,19 @@ public class RecycleBinServiceImpl extends ServiceImpl<RecycleBinMapper, LinkDO>
         baseMapper.update(linkDO, updateWrapper);
 
         stringRedisTemplate.delete(String.format(GOTO_SHORT_LINK, requestParam.getFullShortUri()));
+    }
+
+    @Override
+    public void recoverRecycleBin(RecoverRecycleBinReqDTO requestParam) {
+        LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
+                .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUri())
+                .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getGid, requestParam.getGid());
+        LinkDO linkDO = LinkDO
+                .builder()
+                .enableStatus(0)
+                .build();
+        baseMapper.update(linkDO, updateWrapper);
+        stringRedisTemplate.delete(String.format(GOTO_IS_NULL_SHORT_LINK, requestParam.getFullShortUri()));
     }
 }
