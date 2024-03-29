@@ -69,4 +69,13 @@ public interface LinkRemoteService {
     default void recoverRecycleBin(RecoverRecycleBinReqDTO requestParam) {
         HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/recover", JSON.toJSONString(requestParam));
     }
+
+    /**
+     * 将链接从回收站中删除
+     *
+     * @param requestParam 请求参数
+     */
+    default void deleteRecycleBin(DeleteRecycleBinReqDTO requestParam) {
+        HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/delete", JSON.toJSONString(requestParam));
+    }
 }
