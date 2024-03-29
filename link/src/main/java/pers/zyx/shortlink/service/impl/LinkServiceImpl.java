@@ -6,6 +6,9 @@ import cn.hutool.core.date.Week;
 import cn.hutool.core.lang.UUID;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
@@ -25,6 +28,7 @@ import org.jsoup.nodes.Element;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -32,8 +36,10 @@ import org.springframework.transaction.annotation.Transactional;
 import pers.zyx.shortlink.dao.entity.LinkAccessStatsDO;
 import pers.zyx.shortlink.dao.entity.LinkDO;
 import pers.zyx.shortlink.dao.entity.LinkGotoDO;
+import pers.zyx.shortlink.dao.entity.LinkLocaleStatsDO;
 import pers.zyx.shortlink.dao.mapper.LinkAccessStatsMapper;
 import pers.zyx.shortlink.dao.mapper.LinkGotoMapper;
+import pers.zyx.shortlink.dao.mapper.LinkLocaleStatsMapper;
 import pers.zyx.shortlink.dao.mapper.LinkMapper;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
@@ -52,6 +58,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static pers.zyx.shortlink.constant.LinkAccessStatsConstant.AMAP_REMOTE_URL;
 import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UIP_SHORT_LINK;
 import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UV_SHORT_LINK;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.ENABLE;
@@ -67,6 +74,10 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final RedissonClient redissonClient;
     private final LinkGotoMapper linkGotoMapper;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
+    private final LinkLocaleStatsMapper linkLocaleStatsMapper;
+
+    @Value("${short-link.stats.locale.amap-key}")
+    private String statsLocalAmapKey;
 
     @Override
     @Transactional
@@ -239,7 +250,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         AtomicBoolean uvFirstFlag = new AtomicBoolean();    // 第一次访问标识
         Cookie[] cookies = request.getCookies();
         try {
-            // UV
+            // Uv stats
             Runnable addResponseCookieTesk = () -> {
                 String uv = UUID.randomUUID().toString(true);
                 Cookie uvCookie = new Cookie("uv", uv);
@@ -262,12 +273,12 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                 addResponseCookieTesk.run();
             }
 
-            // UIP
+            // Uip stats
             String remoteAddr = LinkUtil.getActualIp(request);
             Long uipAdded = stringRedisTemplate.opsForSet().add(UIP_SHORT_LINK + fullShortUrl, remoteAddr);
             boolean uipFirstFlag = uipAdded != null && uipAdded > 0L;
 
-            // PV
+            // Pv stats
             if (StrUtil.isBlank(gid)) {
                 LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
                         .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
@@ -290,6 +301,30 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .date(date)
                     .build();
             linkAccessStatsMapper.shortLinkStats(linkAccessStatsDO);
+
+            // Local stats
+            Map<String, Object> localeParamMap = new HashMap<>();
+            localeParamMap.put("key", statsLocalAmapKey);
+            localeParamMap.put("ip", remoteAddr);
+            String localResultStr = HttpUtil.get(AMAP_REMOTE_URL, localeParamMap);
+            JSONObject localResultObj = JSON.parseObject(localResultStr);
+            String infoCode = localResultObj.getString("infocode");
+            LinkLocaleStatsDO linkLocaleStatsDO;
+            if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")) {
+                String province = localResultObj.getString("province");
+                boolean unknownFlag = StrUtil.equals(province, "[]");
+                linkLocaleStatsDO = LinkLocaleStatsDO.builder()
+                        .fullShortUrl(fullShortUrl)
+                        .province(unknownFlag ? "未知" : province)
+                        .city(unknownFlag ? "未知" : localResultObj.getString("city"))
+                        .adcode(unknownFlag ? "未知" : localResultObj.getString("adcode"))
+                        .country("中国")
+                        .gid(gid)
+                        .cnt(1)
+                        .date(date)
+                        .build();
+                linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDO);
+            }
         } catch (Throwable ex) {
             log.error("短链接访问统计异常", ex);
         }
