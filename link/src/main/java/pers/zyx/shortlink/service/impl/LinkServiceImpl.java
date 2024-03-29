@@ -33,14 +33,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pers.zyx.shortlink.dao.entity.LinkAccessStatsDO;
-import pers.zyx.shortlink.dao.entity.LinkDO;
-import pers.zyx.shortlink.dao.entity.LinkGotoDO;
-import pers.zyx.shortlink.dao.entity.LinkLocaleStatsDO;
-import pers.zyx.shortlink.dao.mapper.LinkAccessStatsMapper;
-import pers.zyx.shortlink.dao.mapper.LinkGotoMapper;
-import pers.zyx.shortlink.dao.mapper.LinkLocaleStatsMapper;
-import pers.zyx.shortlink.dao.mapper.LinkMapper;
+import pers.zyx.shortlink.dao.entity.*;
+import pers.zyx.shortlink.dao.mapper.*;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkUpdateReqDTO;
@@ -75,6 +69,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkGotoMapper linkGotoMapper;
     private final LinkAccessStatsMapper linkAccessStatsMapper;
     private final LinkLocaleStatsMapper linkLocaleStatsMapper;
+    private final LinkOsStatsMapper linkOsStatsMapper;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocalAmapKey;
@@ -325,6 +320,16 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                         .build();
                 linkLocaleStatsMapper.shortLinkLocaleState(linkLocaleStatsDO);
             }
+
+            // Os stats
+            LinkOsStatsDO linkOsStatsDO = LinkOsStatsDO.builder()
+                    .fullShortUrl(fullShortUrl)
+                    .os(LinkUtil.getOs(request))
+                    .gid(gid)
+                    .cnt(1)
+                    .date(date)
+                    .build();
+            linkOsStatsMapper.shortLinkOsState(linkOsStatsDO);
         } catch (Throwable ex) {
             log.error("短链接访问统计异常", ex);
         }
