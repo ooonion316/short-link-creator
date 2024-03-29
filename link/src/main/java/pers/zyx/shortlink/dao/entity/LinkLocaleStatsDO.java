@@ -70,7 +70,7 @@ public class LinkLocaleStatsDO {
     private Date updateTime;
 
     /**
-    * 删除标识 0表示删除 1表示未删除
+    * 删除标识：0 未删除 1 已删除
     */
     private int delFlag;
 }

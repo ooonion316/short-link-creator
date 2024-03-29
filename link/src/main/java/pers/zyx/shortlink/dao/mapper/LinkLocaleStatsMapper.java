@@ -8,7 +8,6 @@ import pers.zyx.shortlink.dao.entity.LinkLocaleStatsDO;
 
 @Mapper
 public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
-
     /**
      * 记录地区访问监控数据
      */

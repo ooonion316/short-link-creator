@@ -16,10 +16,12 @@ public class LinkGotoDO {
      * id
      */
     private Long id;
+
     /**
      * 分组id
      */
     private String gid;
+
     /**
      * 完整短链接
      */
