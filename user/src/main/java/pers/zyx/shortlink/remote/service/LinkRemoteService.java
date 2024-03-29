@@ -5,6 +5,7 @@ import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.TypeReference;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import org.springframework.web.bind.annotation.RequestParam;
+import pers.zyx.shortlink.remote.req.SaveRecycleBinReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
@@ -52,5 +53,14 @@ public interface LinkRemoteService {
     default Result<String> getTitleByUrl(@RequestParam("url") String url) {
         String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url=" + url);
         return JSON.parseObject(resultPageStr, new TypeReference<>() {});
+    }
+
+    /**
+     * 将链接移至回收站
+     *
+     * @param requestParam 请求参数
+     */
+    default void saveRecycleBin(SaveRecycleBinReqDTO requestParam) {
+        HttpUtil.post("http://127.0.0.1:8001/api/short-link/v1/recycle-bin/save", JSON.toJSONString(requestParam));
     }
 }
