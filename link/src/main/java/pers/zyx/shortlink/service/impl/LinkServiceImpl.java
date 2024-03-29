@@ -50,7 +50,10 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
+import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UIP_SHORT_LINK;
+import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UV_SHORT_LINK;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.ENABLE;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.PERMANENT;
 import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.*;
@@ -63,6 +66,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final StringRedisTemplate stringRedisTemplate;
     private final RedissonClient redissonClient;
     private final LinkGotoMapper linkGotoMapper;
+    private final LinkAccessStatsMapper linkAccessStatsMapper;
 
     @Override
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
@@ -175,6 +179,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         // 尝试从 Redis 中获取原始链接
         String originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK, fullShortUrl));
         if (Strings.isNotBlank(originLink)) {
+            shortLinkStats(fullShortUrl, null, request, response);
             response.sendRedirect(originLink);
             return;
         }
@@ -186,6 +191,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             // 双重判定锁
             originLink = stringRedisTemplate.opsForValue().get(String.format(GOTO_SHORT_LINK, fullShortUrl));
             if (Strings.isNotBlank(originLink)) {
+                shortLinkStats(fullShortUrl, null, request, response);
                 response.sendRedirect(originLink);
                 return;
             }
@@ -221,25 +227,70 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             // 重建缓存
             stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK, fullShortUrl), linkDO.getOriginUrl(),
                     LinkUtil.getLinkCacheValidDate(linkDO.getValidDate()), TimeUnit.MILLISECONDS);
+            shortLinkStats(fullShortUrl, null, request, response);
             response.sendRedirect(linkDO.getOriginUrl());
         } finally {
             lock.unlock();
         }
+    }
 
-        LambdaQueryWrapper<LinkGotoDO> linkGotoQueryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
-                .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
-        LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(linkGotoQueryWrapper);
-        if (linkGotoDO == null) {
-            // TODO 可能是恶意访问, 进行风控
-        }
+    private void shortLinkStats(String fullShortUrl, String gid, HttpServletRequest request, HttpServletResponse response) {
+        AtomicBoolean uvFirstFlag = new AtomicBoolean();    // 第一次访问标识
+        Cookie[] cookies = request.getCookies();
+        try {
+            // UV
+            Runnable addResponseCookieTesk = () -> {
+                String uv = UUID.randomUUID().toString(true);
+                Cookie uvCookie = new Cookie("uv", uv);
+                uvCookie.setMaxAge(60 * 60 * 24 * 30);
+                uvCookie.setPath(StrUtil.sub(fullShortUrl, fullShortUrl.indexOf("."), fullShortUrl.length())); // 如果不设置, 则该域名下所有链接都使用这个cookie
+                response.addCookie(uvCookie);
+                uvFirstFlag.set(Boolean.TRUE);
+                stringRedisTemplate.opsForSet().add(UV_SHORT_LINK + fullShortUrl, uv);
+            };
+            if (ArrayUtil.isNotEmpty(cookies)) {
+                Arrays.stream(cookies)
+                        .filter(each -> Objects.equals(each.getName(), "uv"))
+                        .findFirst()
+                        .map(Cookie::getValue)
+                        .ifPresentOrElse(each -> {
+                            Long uvAdded = stringRedisTemplate.opsForSet().add(UV_SHORT_LINK + fullShortUrl, each);
+                            uvFirstFlag.set(uvAdded != null && uvAdded > 0L);
+                        }, addResponseCookieTesk);
+            } else {
+                addResponseCookieTesk.run();
+            }
 
-        LambdaQueryWrapper<LinkDO> linkQueryWrapper = Wrappers.lambdaQuery(LinkDO.class)
-                .eq(LinkDO::getEnableStatus, ENABLE)
-                .eq(LinkDO::getGid, linkGotoDO.getGid())
-                .eq(LinkDO::getFullShortUrl, linkGotoDO.getFullShortUrl());
-        LinkDO linkDO = baseMapper.selectOne(linkQueryWrapper);
-        if (linkDO != null) {
-                response.sendRedirect(linkDO.getOriginUrl());
+            // UIP
+            String remoteAddr = LinkUtil.getActualIp(request);
+            Long uipAdded = stringRedisTemplate.opsForSet().add(UIP_SHORT_LINK + fullShortUrl, remoteAddr);
+            boolean uipFirstFlag = uipAdded != null && uipAdded > 0L;
+
+            // PV
+            if (StrUtil.isBlank(gid)) {
+                LambdaQueryWrapper<LinkGotoDO> queryWrapper = Wrappers.lambdaQuery(LinkGotoDO.class)
+                        .eq(LinkGotoDO::getFullShortUrl, fullShortUrl);
+                LinkGotoDO linkGotoDO = linkGotoMapper.selectOne(queryWrapper);
+                gid = linkGotoDO.getGid();
+            }
+            Date date = new Date();
+            int hour = DateUtil.hour(date, true);
+            Week week = DateUtil.dayOfWeekEnum(date);
+            int weekValue = week.getIso8601Value();
+
+            LinkAccessStatsDO linkAccessStatsDO = LinkAccessStatsDO.builder()
+                    .pv(1)
+                    .uv(uvFirstFlag.get() ? 1 : 0)
+                    .uip(uipFirstFlag ? 1 : 0)
+                    .hour(hour)
+                    .weekday(weekValue)
+                    .fullShortUrl(fullShortUrl)
+                    .gid(gid)
+                    .date(date)
+                    .build();
+            linkAccessStatsMapper.shortLinkStats(linkAccessStatsDO);
+        } catch (Throwable ex) {
+            log.error("短链接访问统计异常", ex);
         }
     }
 
