@@ -312,13 +312,15 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             JSONObject localResultObj = JSON.parseObject(localResultStr);
             String infoCode = localResultObj.getString("infocode");
             LinkLocaleStatsDO linkLocaleStatsDO;
+            String actualProvince = "未知";
+            String actualCity = "未知";
             if (StrUtil.isNotBlank(infoCode) && StrUtil.equals(infoCode, "10000")) {
                 String province = localResultObj.getString("province");
                 boolean unknownFlag = StrUtil.equals(province, "[]");
                 linkLocaleStatsDO = LinkLocaleStatsDO.builder()
                         .fullShortUrl(fullShortUrl)
-                        .province(unknownFlag ? "未知" : province)
-                        .city(unknownFlag ? "未知" : localResultObj.getString("city"))
+                        .province(actualProvince = unknownFlag ? "未知" : province)
+                        .city(actualCity = unknownFlag ? "未知" : localResultObj.getString("city"))
                         .adcode(unknownFlag ? "未知" : localResultObj.getString("adcode"))
                         .country("中国")
                         .gid(gid)
@@ -351,14 +353,27 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             linkBrowserStatsMapper.shortLinkBrowserState(linkBrowserStatsDO);
 
             // Device stats
+            String device = LinkUtil.getDevice(request);
             LinkDeviceStatsDO linkDeviceStatsDO = LinkDeviceStatsDO.builder()
-                    .device(LinkUtil.getDevice(request))
+                    .device(device)
                     .cnt(1)
                     .gid(gid)
                     .fullShortUrl(fullShortUrl)
                     .date(new Date())
                     .build();
             linkDeviceStatsMapper.shortLinkDeviceState(linkDeviceStatsDO);
+
+            // Network stats
+            String network = LinkUtil.getNetwork(request);
+            LinkNetworkStatsDO linkNetworkStatsDO = LinkNetworkStatsDO.builder()
+                    .network(network)
+                    .cnt(1)
+                    .gid(gid)
+                    .fullShortUrl(fullShortUrl)
+                    .date(new Date())
+                    .build();
+            linkNetworkStatsMapper.shortLinkNetworkState(linkNetworkStatsDO);
+
 
             // Frequency IP stats
             LinkAccessLogsDO linkAccessLogsDO = LinkAccessLogsDO.builder()
@@ -368,18 +383,11 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
                     .gid(gid)
                     .fullShortUrl(fullShortUrl)
                     .user(uv.get())
+                    .network(network)
+                    .device(device)
+                    .locale(StrUtil.join("-", "中国", actualProvince, actualCity))
                     .build();
             linkAccessLogsMapper.insert(linkAccessLogsDO);
-
-            // Network stats
-            LinkNetworkStatsDO linkNetworkStatsDO = LinkNetworkStatsDO.builder()
-                    .network(LinkUtil.getNetwork(request))
-                    .cnt(1)
-                    .gid(gid)
-                    .fullShortUrl(fullShortUrl)
-                    .date(new Date())
-                    .build();
-            linkNetworkStatsMapper.shortLinkNetworkState(linkNetworkStatsDO);
         } catch (Throwable ex) {
             log.error("短链接访问统计异常", ex);
         }
