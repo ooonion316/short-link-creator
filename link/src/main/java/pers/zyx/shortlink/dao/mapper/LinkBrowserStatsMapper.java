@@ -4,7 +4,12 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import pers.zyx.shortlink.dao.entity.LinkBrowserStatsDO;
+import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
+
+import java.util.HashMap;
+import java.util.List;
 
 @Mapper
 public interface LinkBrowserStatsMapper extends BaseMapper<LinkBrowserStatsDO> {
@@ -19,4 +24,23 @@ public interface LinkBrowserStatsMapper extends BaseMapper<LinkBrowserStatsDO> {
         """)
     void shortLinkBrowserState(@Param("linkBrowserStats") LinkBrowserStatsDO linkBrowserStatsDO);
 
+    /**
+     * 根据短链接获取指定日期内浏览器统计数据
+     */
+    @Select("""
+            SELECT
+                browser,
+                SUM(cnt) AS count
+            FROM 
+                t_link_browser_stats
+            WHERE
+                full_short_url = #{param.fullShortUrl}
+                AND gid = #{param.gid}
+                AND date BETWEEN #{param.startDate} AND #{param.endDate}
+            GROUP BY
+                full_short_url,
+                gid,
+                browser
+        """)
+    List<HashMap<String, Object>> listBrowserStatsByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
 }

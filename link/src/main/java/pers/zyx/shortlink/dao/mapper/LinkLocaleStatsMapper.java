@@ -4,7 +4,11 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import pers.zyx.shortlink.dao.entity.LinkLocaleStatsDO;
+import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
+
+import java.util.List;
 
 @Mapper
 public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
@@ -18,4 +22,24 @@ public interface LinkLocaleStatsMapper extends BaseMapper<LinkLocaleStatsDO> {
                 cnt = cnt + #{linkLocaleStats.cnt};
         """)
     void shortLinkLocaleState(@Param("linkLocaleStats") LinkLocaleStatsDO linkLocaleStatsDO);
+
+    /**
+     * 根据短链接获取指定日期内地区访问统计数据
+     */
+    @Select("""
+            SELECT
+                province,
+                SUM(cnt) AS cnt
+            FROM
+                t_link_locale_stats
+            WHERE
+                full_short_url = #{param.fullShortUrl}
+                AND gid = #{param.gid}
+                AND date BETWEEN #{param.startDate} AND #{param.endDate}
+            GROUP BY
+                full_short_url,
+                gid,
+                province
+        """)
+    List<LinkLocaleStatsDO> listLocaleByShortLink(@Param("param")ShortLinkStatsReqDTO requestParam);
 }
