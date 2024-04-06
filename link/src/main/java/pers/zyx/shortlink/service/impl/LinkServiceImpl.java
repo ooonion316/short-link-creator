@@ -91,6 +91,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         String fullShortUrl = createShortLinkDefaultDomain + "/" + suffix;
 
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
+        linkDO.setDomain(createShortLinkDefaultDomain);
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
