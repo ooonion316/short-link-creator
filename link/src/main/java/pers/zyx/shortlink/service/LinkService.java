@@ -5,9 +5,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import pers.zyx.shortlink.dao.entity.LinkDO;
+import pers.zyx.shortlink.dto.req.ShortLinkBatchCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkUpdateReqDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkBatchCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
@@ -56,4 +58,12 @@ public interface LinkService extends IService<LinkDO> {
      * @param response  响应
      */
     void restoreUri(String shortUri, HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 批量创建短链接
+     *
+     * @param requestParam 批量创建短链接请求参数
+     * @return 批量创建短链接返回参数
+     */
+    ShortLinkBatchCreateRespDTO batchCreateShortLink(ShortLinkBatchCreateReqDTO requestParam);
 }

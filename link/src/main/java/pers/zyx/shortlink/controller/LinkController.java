@@ -5,9 +5,11 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import pers.zyx.shortlink.dto.req.ShortLinkBatchCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkUpdateReqDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkBatchCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
@@ -29,6 +31,14 @@ public class LinkController {
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         ShortLinkCreateRespDTO result = linkService.createShortLink(requestParam);
         return Results.success(result);
+    }
+
+    /**
+     * 批量创建短链接
+     */
+    @PostMapping("/api/short-link/v1/create/batch")
+    public Result<ShortLinkBatchCreateRespDTO> batchCreateShortLink(@RequestBody ShortLinkBatchCreateReqDTO requestParam) {
+        return Results.success(linkService.batchCreateShortLink(requestParam));
     }
 
 
