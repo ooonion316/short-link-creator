@@ -79,13 +79,16 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocalAmapKey;
 
+    @Value("${short-link.domain.default}")
+    public String createShortLinkDefaultDomain;
+
     @Override
     @Transactional
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
-        String suffix = generateSuffix(requestParam.getDomain(), requestParam.getOriginUrl());
+        String suffix = generateSuffix(createShortLinkDefaultDomain, requestParam.getOriginUrl());
         if (suffix == "") throw new ClientException("访问人数过多, 请稍后再试");
 
-        String fullShortUrl = requestParam.getDomain() + "/" + suffix;
+        String fullShortUrl = createShortLinkDefaultDomain + "/" + suffix;
 
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
         linkDO.setFullShortUrl(fullShortUrl);
@@ -104,8 +107,10 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         }
         shortLinkBloomFilter.add(fullShortUrl);
 
+        String resultUrl = "http://" + linkDO.getDomain() + ":8001" + "/" + linkDO.getShortUri();
+
         return ShortLinkCreateRespDTO.builder()
-                .fullShortUrl(linkDO.getFullShortUrl())
+                .fullShortUrl(resultUrl)
                 .originUrl(linkDO.getOriginUrl())
                 .gid(linkDO.getGid())
                 .build();
@@ -179,10 +184,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @Override
     @SneakyThrows
     public void restoreUri(String shortUri, HttpServletRequest request, HttpServletResponse response) {
-        String scheme = request.getScheme();
         String serverName = request.getServerName();
-        String fullShortUrl = scheme + "://" + serverName + "/" + shortUri;
-
+        String fullShortUrl = serverName + "/" + shortUri;
         // 判断布隆过滤器
         if (!shortLinkBloomFilter.contains(fullShortUrl)) {
             response.sendRedirect("/page/notfound");
@@ -399,7 +402,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         for(int i = 0; i < 10; i++) {
             suffix = originUrl + System.currentTimeMillis();
             suffix = HashUtil.hashToBase62(suffix);
-            if (!shortLinkBloomFilter.contains(domain + "/" + suffix)) break;;
+            if (!shortLinkBloomFilter.contains(domain + "/" + suffix)) break;
         }
         return suffix;
     }
