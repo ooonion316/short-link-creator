@@ -159,7 +159,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     public void updateShortLink(ShortLinkUpdateReqDTO requestParam) {
         LambdaQueryWrapper<LinkDO> queryWrapper = Wrappers.lambdaQuery(LinkDO.class)
                 .eq(LinkDO::getEnableStatus, ENABLE)
-                .eq(LinkDO::getGid, requestParam.getGid())
+                .eq(LinkDO::getGid, requestParam.getOriginGid())
                 .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUrl());
         LinkDO hasShortLinkDO = baseMapper.selectOne(queryWrapper);
         if (hasShortLinkDO == null) {
