@@ -7,6 +7,7 @@ import cn.hutool.core.date.DateUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.dao.entity.*;
@@ -18,6 +19,8 @@ import pers.zyx.shortlink.service.ShortLinkStatsService;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -236,13 +239,26 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         LambdaQueryWrapper<LinkAccessLogsDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDO.class)
                 .eq(LinkAccessLogsDO::getGid, requestParam.getGid())
                 .eq(LinkAccessLogsDO::getFullShortUrl, requestParam.getFullShortUrl())
-                .between(LinkAccessLogsDO::getCreateTime, requestParam.getStartDate(), requestParam.getEndDate())
                 .orderByDesc(LinkAccessLogsDO::getCreateTime);
         IPage<LinkAccessLogsDO> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
-        IPage<ShortLinkStatsAccessRecordRespDTO> actualResult = linkAccessLogsDOIPage.convert(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class));
-        List<String> userAccessLogsList = actualResult.getRecords().stream()
+
+        // 去重并转换
+        List<ShortLinkStatsAccessRecordRespDTO> actualResultList = linkAccessLogsDOIPage.getRecords().stream()
+                .collect(Collectors.toMap(LinkAccessLogsDO::getUser, Function.identity(), (existing, replacement) -> existing))
+                .values().stream()
+                .map(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class))
+                .collect(Collectors.toList());
+
+        // 设置total
+        int total = actualResultList.size();
+
+        // 获取用户列表
+        List<String> userAccessLogsList = actualResultList.stream()
                 .map(ShortLinkStatsAccessRecordRespDTO::getUser)
+                .distinct()
                 .toList();
+
+        // 查询UV类型列表
         List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectUvTypeByUsers(
                 requestParam.getGid(),
                 requestParam.getFullShortUrl(),
@@ -250,15 +266,24 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
                 requestParam.getEndDate(),
                 userAccessLogsList
         );
-        actualResult.getRecords().forEach(each -> {
+
+        // 设置UV类型
+        actualResultList.forEach(each -> {
             String uvType = uvTypeList.stream()
                     .filter(item -> Objects.equals(each.getUser(), item.get("user")))
                     .findFirst()
-                    .map(item -> item.get("UvType"))
+                    .map(item -> item.get("uvType"))
                     .map(Object::toString)
                     .orElse("旧访客");
             each.setUvType(uvType);
         });
+
+        // 创建新的IPage对象
+        IPage<ShortLinkStatsAccessRecordRespDTO> actualResult = new Page<>();
+        actualResult.setRecords(actualResultList);
+        actualResult.setTotal(total);
+
         return actualResult;
     }
+
 }

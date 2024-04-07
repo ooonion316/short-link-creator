@@ -82,4 +82,38 @@ public class LinkDO extends BaseDO {
      */
     @TableField("`describe`")
     private String describe;
+
+    /**
+     * 历史 PV
+     */
+    private Integer totalPv;
+
+    /**
+     * 历史 UV
+     */
+    private Integer totalUv;
+
+    /**
+     * 历史 UIP
+     */
+    private Integer totalUip;
+
+
+    /**
+     * 今日PV
+     */
+    @TableField(exist = false)
+    private Integer todayPv;
+
+    /**
+     * 今日UV
+     */
+    @TableField(exist = false)
+    private Integer todayUv;
+
+    /**
+     * 今日UIP
+     */
+    @TableField(exist = false)
+    private Integer todayUip;
 }
