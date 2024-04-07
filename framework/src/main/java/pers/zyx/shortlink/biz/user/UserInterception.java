@@ -52,8 +52,7 @@ public class UserInterception implements HandlerInterceptor {
             UserInfoDTO userInfoDTO = JSON.parseObject(userInfo.toString(), UserInfoDTO.class);
             UserContext.setUser(userInfoDTO);
         } else {
-            response.setStatus(401);
-            return false;
+            throw new ClientException("用户未登录");
         }
         return true;
     }
