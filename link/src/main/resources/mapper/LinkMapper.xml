@@ -17,7 +17,7 @@
   -->
 
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nageoffer.shortlink.project.dao.mapper.ShortLinkMapper">
+<mapper namespace="pers.zyx.shortlink.dao.mapper.LinkMapper">
 
     <!-- 分页查询短链接 -->
     <select id="pageLink" parameterType="pers.zyx.shortlink.dto.req.ShortLinkPageReqDTO"
