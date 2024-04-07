@@ -51,6 +51,7 @@ import pers.zyx.shortlink.service.LinkStatsTodayService;
 import pers.zyx.shortlink.util.HashUtil;
 import pers.zyx.shortlink.util.LinkUtil;
 
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -100,6 +101,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
 
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
         linkDO.setDomain(createShortLinkDefaultDomain);
+        linkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
@@ -589,17 +591,21 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         return suffix;
     }
 
-    @SneakyThrows
     public String getFavicon(String url) {
-        URL targetUrl = new URL(url);
-        HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
-        connection.setRequestMethod("GET");
-        connection.connect();
-        int responseCode = connection.getResponseCode();
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            Document document = Jsoup.connect(url).get();
-            Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon").first();
-            if (faviconLink != null) return faviconLink.attr("abs:href");
+        try {
+            URL targetUrl = new URL(url);
+            HttpURLConnection connection = (HttpURLConnection) targetUrl.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(3000);
+            connection.connect();
+            int responseCode = connection.getResponseCode();
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                Document document = Jsoup.connect(url).get();
+                Element faviconLink = document.select("link[rel~=(?i)^(shortcut )?icon").first();
+                if (faviconLink != null) return faviconLink.attr("abs:href");
+            }
+        } catch (Exception e) {
+            return null;
         }
         return null;
     }
