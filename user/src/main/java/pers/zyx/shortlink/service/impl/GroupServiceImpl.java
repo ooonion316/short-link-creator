@@ -16,6 +16,7 @@ import pers.zyx.shortlink.dao.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSortReqDTO;
 import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
+import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.GroupService;
 
 import java.util.List;
@@ -81,7 +82,10 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .set(GroupDO::getDelFlag, 1);
         GroupDO groupDO = new GroupDO();
         groupDO.setDelFlag(1);
-        baseMapper.update(groupDO, updateWrapper);
+        int update = baseMapper.update(groupDO, updateWrapper);
+        if (update < 1) {
+            throw new ClientException("删除时遇到了未知错误～");
+        }
     }
 
     @Override
