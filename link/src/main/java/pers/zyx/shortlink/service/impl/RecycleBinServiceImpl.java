@@ -56,9 +56,11 @@ public class RecycleBinServiceImpl extends ServiceImpl<RecycleBinMapper, LinkDO>
     public void deleteRecycleBin(DeleteRecycleBinReqDTO requestParam) {
         LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
                 .eq(LinkDO::getEnableStatus, 1)
+                .eq(LinkDO::getDelTime, 0L)
                 .eq(LinkDO::getGid, requestParam.getGid())
                 .eq(LinkDO::getFullShortUrl, requestParam.getFullShortUri());
         LinkDO linkDO = LinkDO.builder()
+                .delTime(System.currentTimeMillis())
                 .build();
         linkDO.setDelFlag(1);
         baseMapper.update(linkDO, updateWrapper);
