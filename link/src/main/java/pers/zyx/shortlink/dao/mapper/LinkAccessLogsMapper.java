@@ -76,9 +76,13 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
      */
     @Select("""
             <script>
-            SELECT 
+            SELECT
                 user,
-                CASE WHEN MIN(create_time) BETWEEN #{startDate} AND #{endDate} THEN '新访客' ELSE '老访客' END AS uvType
+                CASE
+                    WHEN MIN(create_time) &lt;= #{startDate} THEN '老访客'
+                    WHEN MIN(create_time) &gt; #{startDate} THEN '新访客'
+                    ELSE '未知'
+                END AS uvType
             FROM t_link_access_logs
             WHERE
                 full_short_url = #{fullShortUrl} AND
