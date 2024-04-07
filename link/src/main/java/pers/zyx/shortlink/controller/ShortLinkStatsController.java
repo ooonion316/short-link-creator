@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
@@ -40,5 +41,13 @@ public class ShortLinkStatsController {
     @GetMapping("/api/short-link/v1/stats/access-record")
     public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
         return Results.success(shortLinkStatsService.shortLinkStatsAccessRecord(requestParam));
+    }
+
+    /**
+     * 查看分组内所有短链接指定时间内访问记录监控数据
+     */
+    @GetMapping("/api/short-link/v1/stats/access-record/group")
+    public Result<IPage<ShortLinkStatsAccessRecordRespDTO>> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        return Results.success(shortLinkStatsService.shortLinkGroupStatsAccessRecord(requestParam));
     }
 }

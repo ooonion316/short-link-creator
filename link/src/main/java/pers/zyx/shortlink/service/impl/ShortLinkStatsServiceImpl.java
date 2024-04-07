@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.dao.entity.*;
 import pers.zyx.shortlink.dao.mapper.*;
+import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
@@ -441,6 +442,58 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
         List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectUvTypeByUsers(
                 requestParam.getGid(),
                 requestParam.getFullShortUrl(),
+                requestParam.getStartDate(),
+                requestParam.getEndDate(),
+                userAccessLogsList
+        );
+
+        // 设置UV类型
+        actualResultList.forEach(each -> {
+            String uvType = uvTypeList.stream()
+                    .filter(item -> Objects.equals(each.getUser(), item.get("user")))
+                    .findFirst()
+                    .map(item -> item.get("uvType"))
+                    .map(Object::toString)
+                    .orElse("旧访客");
+            each.setUvType(uvType);
+        });
+
+        // 创建新的IPage对象
+        IPage<ShortLinkStatsAccessRecordRespDTO> actualResult = new Page<>();
+        actualResult.setRecords(actualResultList);
+        actualResult.setTotal(total);
+
+        return actualResult;
+    }
+
+    @Override
+    public IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam) {
+        requestParam.setStartDate(requestParam.getStartDate() + " 00:00:00");
+        requestParam.setEndDate(requestParam.getEndDate() + " 23:59:59");
+        LambdaQueryWrapper<LinkAccessLogsDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDO.class)
+                .eq(LinkAccessLogsDO::getGid, requestParam.getGid())
+                .orderByDesc(LinkAccessLogsDO::getCreateTime);
+        IPage<LinkAccessLogsDO> linkAccessLogsDOIPage = linkAccessLogsMapper.selectPage(requestParam, queryWrapper);
+
+        // 去重并转换
+        List<ShortLinkStatsAccessRecordRespDTO> actualResultList = linkAccessLogsDOIPage.getRecords().stream()
+                .collect(Collectors.toMap(LinkAccessLogsDO::getUser, Function.identity(), (existing, replacement) -> existing))
+                .values().stream()
+                .map(each -> BeanUtil.toBean(each, ShortLinkStatsAccessRecordRespDTO.class))
+                .collect(Collectors.toList());
+
+        // 设置total
+        int total = actualResultList.size();
+
+        // 获取用户列表
+        List<String> userAccessLogsList = actualResultList.stream()
+                .map(ShortLinkStatsAccessRecordRespDTO::getUser)
+                .distinct()
+                .toList();
+
+        // 查询UV类型列表
+        List<Map<String, Object>> uvTypeList = linkAccessLogsMapper.selectGroupUvTypeByUsers(
+                requestParam.getGid(),
                 requestParam.getStartDate(),
                 requestParam.getEndDate(),
                 userAccessLogsList

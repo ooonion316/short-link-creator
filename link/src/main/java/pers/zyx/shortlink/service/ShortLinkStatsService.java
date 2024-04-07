@@ -2,6 +2,7 @@ package pers.zyx.shortlink.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
@@ -35,4 +36,11 @@ public interface ShortLinkStatsService {
      */
     IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam);
 
+    /**
+     * 查看分组内所有短链接指定时间内访问记录监控数据
+     *
+     * @param requestParam 请求参数
+     * @return 返回结果
+     */
+    IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkGroupStatsAccessRecord(ShortLinkGroupStatsAccessRecordReqDTO requestParam);
 }
