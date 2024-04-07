@@ -246,7 +246,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
     }
 
     @Override
-    public ShortLinkStatsRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+    public ShortLinkStatsGroupRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
         List<LinkAccessStatsDO> listStatsByGroup = linkAccessStatsMapper.listStatsByGroup(requestParam);
         if (CollUtil.isEmpty(listStatsByGroup)) {
             return null;
@@ -396,7 +396,7 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
                     .build();
             networkStats.add(networkRespDTO);
         });
-        return ShortLinkStatsRespDTO.builder()
+        return ShortLinkStatsGroupRespDTO.builder()
                 .pv(pvUvUidStatsByGroup.getPv())
                 .uv(pvUvUidStatsByGroup.getUv())
                 .uip(pvUvUidStatsByGroup.getUip())

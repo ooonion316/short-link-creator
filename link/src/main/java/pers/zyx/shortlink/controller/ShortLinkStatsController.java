@@ -9,6 +9,7 @@ import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkStatsAccessRecordRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkStatsGroupRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkStatsRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
@@ -31,7 +32,7 @@ public class ShortLinkStatsController {
      * 查看分组内所有短链接指定时间内监控数据
      */
     @GetMapping("/api/short-link/v1/stats/group")
-    public Result<ShortLinkStatsRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
+    public Result<ShortLinkStatsGroupRespDTO> groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam) {
         return Results.success(shortLinkStatsService.groupShortLinkStats(requestParam));
     }
 

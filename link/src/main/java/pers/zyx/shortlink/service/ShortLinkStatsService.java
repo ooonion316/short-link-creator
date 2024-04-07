@@ -7,6 +7,7 @@ import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsAccessRecordReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkStatsAccessRecordRespDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkStatsGroupRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkStatsRespDTO;
 
 public interface ShortLinkStatsService {
@@ -26,7 +27,7 @@ public interface ShortLinkStatsService {
      * @param requestParam 请求参数
      * @return 返回结果
      */
-    ShortLinkStatsRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam);
+    ShortLinkStatsGroupRespDTO groupShortLinkStats(ShortLinkGroupStatsReqDTO requestParam);
 
     /**
      * 查看单个短链接指定时间内访问记录监控数据
