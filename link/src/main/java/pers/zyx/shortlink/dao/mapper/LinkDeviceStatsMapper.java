@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import pers.zyx.shortlink.dao.entity.LinkDeviceStatsDO;
+import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
 
 import java.util.List;
@@ -37,4 +38,19 @@ public interface LinkDeviceStatsMapper extends BaseMapper<LinkDeviceStatsDO> {
                 device
         """)
     List<LinkDeviceStatsDO> listDevicesStatsByShortLink(@Param("param") ShortLinkStatsReqDTO requestParam);
+
+    /**
+     * 根据分组获取指定日期内访问设备监控数据
+     */
+    @Select("SELECT " +
+            "    device, " +
+            "    SUM(cnt) AS cnt " +
+            "FROM " +
+            "    t_link_device_stats " +
+            "WHERE " +
+            "    gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    gid, device;")
+    List<LinkDeviceStatsDO> listDeviceStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
 }

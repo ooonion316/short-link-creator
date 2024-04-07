@@ -1,12 +1,11 @@
 package pers.zyx.shortlink.dao.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 import pers.zyx.shortlink.dao.entity.LinkAccessStatsDO;
+import pers.zyx.shortlink.dto.req.ShortLinkGroupStatsReqDTO;
 import pers.zyx.shortlink.dto.req.ShortLinkStatsReqDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 
 import java.util.List;
 
@@ -85,4 +84,67 @@ public interface LinkAccessStatsMapper extends BaseMapper<LinkAccessStatsDO> {
                 weekday
         """)
     List<LinkAccessStatsDO> listWeekdayStatsByShortLink(@Param("param")ShortLinkStatsReqDTO requestParam);
+
+
+    /**
+     * 根据分组获取指定日期内基础监控数据
+     */
+    @Select("SELECT " +
+            "    date, " +
+            "    SUM(pv) AS pv, " +
+            "    SUM(uv) AS uv, " +
+            "    SUM(uip) AS uip " +
+            "FROM " +
+            "    t_link_access_stats " +
+            "WHERE " +
+            "    gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    gid, date;")
+    List<LinkAccessStatsDO> listStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
+     * 根据分组获取指定日期内小时基础监控数据
+     */
+    @Select("SELECT " +
+            "    hour, " +
+            "    SUM(pv) AS pv " +
+            "FROM " +
+            "    t_link_access_stats " +
+            "WHERE " +
+            "    gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    gid, hour;")
+    List<LinkAccessStatsDO> listHourStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
+
+    /**
+     * 根据分组获取指定日期内每周基础监控数据
+     */
+    @Select("SELECT " +
+            "    weekday, " +
+            "    SUM(pv) AS pv " +
+            "FROM " +
+            "    t_link_access_stats " +
+            "WHERE " +
+            "    gid = #{param.gid} " +
+            "    AND date BETWEEN #{param.startDate} and #{param.endDate} " +
+            "GROUP BY " +
+            "    gid, weekday;")
+    List<LinkAccessStatsDO> listWeekdayStatsByGroup(@Param("param") ShortLinkGroupStatsReqDTO requestParam);
+
+    @Select("""
+            SELECT
+                full_short_url,
+                SUM(CASE WHEN date = CURDATE() THEN pv ELSE 0 END) AS today_pv,
+                SUM(CASE WHEN date = CURDATE() THEN uv ELSE 0 END) AS today_uv,
+                SUM(CASE WHEN date = CURDATE() THEN uip ELSE 0 END) AS today_uip,
+                SUM(pv) AS total_pv,
+                SUM(uv) AS total_uv,
+                SUM(uip) AS total_uip
+            FROM t_link_access_stats
+            WHERE gid = #{gid}
+            group by full_short_url
+        """)
+   List<ShortLinkPageRespDTO> listLinkStatsByGroup(@Param("gid") String gid);
 }
