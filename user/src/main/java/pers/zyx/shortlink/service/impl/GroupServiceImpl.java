@@ -66,8 +66,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
     public void updateGroup(GroupUpdateReqDTO requestParam) {
         LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
                 .eq(GroupDO::getUsername, UserContext.getUsername())
-                .eq(GroupDO::getGid, requestParam.getGid())
-                .eq(GroupDO::getName, requestParam.getName());
+                .eq(GroupDO::getGid, requestParam.getGid());
         GroupDO groupDO = GroupDO.builder()
                 .name(requestParam.getName())
                 .build();
