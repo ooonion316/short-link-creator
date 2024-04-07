@@ -62,10 +62,10 @@ public interface LinkAccessLogsMapper extends BaseMapper<LinkAccessLogsDO> {
                 SUM(new_user) AS newUserCnt
             FROM(SELECT
                      CASE WHEN COUNT(DISTINCT DATE(create_time)) > 1 THEN 1 ELSE 0 END AS old_user,
-                     CASE WHEN COUNT(DISTINCT DATE(create_time)) = 1 AND MAX(DATE(create_time)) >= #{param.endDate} AND MAX(DATE(create_time)) <= #{param.endDate} THEN 1 ELSE 0 END AS new_user
+                     CASE WHEN COUNT(DISTINCT DATE(create_time)) = 1 AND MAX(DATE(create_time)) >= #{param.startDate} AND MAX(DATE(create_time)) <= #{param.endDate} THEN 1 ELSE 0 END AS new_user
                  from t_link_access_logs
-                 where full_short_url = 'http://nurl.lnk/1xd7iO'
-                   and gid = 'pwztz8'
+                 where full_short_url = #{param.fullShortUrl}
+                   and gid = #{param.gid}
                  group by user)
                     as user_counts
         """)
