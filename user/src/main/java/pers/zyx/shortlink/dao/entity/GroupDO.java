@@ -1,11 +1,14 @@
 package pers.zyx.shortlink.dao.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldFill;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import pers.zyx.shortlink.dao.BaseDO;
+
+import java.time.LocalDateTime;
 
 /**
  * 短链接分组实体
@@ -15,7 +18,7 @@ import pers.zyx.shortlink.dao.BaseDO;
 @NoArgsConstructor
 @AllArgsConstructor
 @TableName("t_group")
-public class GroupDO extends BaseDO {
+public class GroupDO {
     /**
      * id
      */
@@ -40,4 +43,21 @@ public class GroupDO extends BaseDO {
      * 分组排序
      */
     private Integer sortOrder;
+
+    /**
+     * 创建时间
+     */
+    @TableField(fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
+
+    /**
+     * 修改时间
+     */
+    @TableField(fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
+
+    /**
+     * 删除标识 0：未删除 1：已删除
+     */
+    private Integer delFlag;
 }

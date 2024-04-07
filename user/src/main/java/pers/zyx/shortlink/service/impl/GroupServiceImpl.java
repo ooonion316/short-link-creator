@@ -11,7 +11,6 @@ import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.biz.user.UserContext;
-import pers.zyx.shortlink.dao.BaseDO;
 import pers.zyx.shortlink.dao.entity.GroupDO;
 import pers.zyx.shortlink.dao.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSortReqDTO;
@@ -79,7 +78,7 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         LambdaUpdateWrapper<GroupDO> updateWrapper = Wrappers.lambdaUpdate(GroupDO.class)
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .eq(GroupDO::getGid, gid)
-                .set(BaseDO::getDelFlag, 1);
+                .set(GroupDO::getDelFlag, 1);
         GroupDO groupDO = new GroupDO();
         groupDO.setDelFlag(1);
         baseMapper.update(groupDO, updateWrapper);
