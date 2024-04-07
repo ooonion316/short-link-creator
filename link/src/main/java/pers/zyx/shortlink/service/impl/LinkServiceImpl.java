@@ -94,6 +94,9 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
+        linkDO.setTotalPv(0);
+        linkDO.setTotalUv(0);
+        linkDO.setTotalUip(0);
         LinkGotoDO linkGotoDO = LinkGotoDO.builder()
                 .gid(requestParam.getGid())
                 .fullShortUrl(fullShortUrl)
