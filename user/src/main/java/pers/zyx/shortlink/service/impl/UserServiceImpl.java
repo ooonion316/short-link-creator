@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jodd.cli.Cli;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
@@ -26,6 +27,7 @@ import pers.zyx.shortlink.exception.ClientException;
 import pers.zyx.shortlink.service.GroupService;
 import pers.zyx.shortlink.service.UserService;
 
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import static pers.zyx.shortlink.constant.UserRedisKeyConstant.USER_LOGIN_PREFIX;
@@ -105,9 +107,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, UserDO> implements 
             throw new ClientException(USER_NULL);
         }
 
-        Boolean isLogin = stringRedisTemplate.hasKey(USER_LOGIN_PREFIX + requestParam.getUsername());
-        if (isLogin != null && isLogin) {
-            throw new ClientException(USER_EXIST);
+        Map<Object, Object> hasLoginMap = stringRedisTemplate.opsForHash().entries(USER_LOGIN_PREFIX + requestParam.getUsername());
+        if (!hasLoginMap.isEmpty()) {
+            String token = hasLoginMap.keySet().stream()
+                    .findFirst()
+                    .map(Object::toString)
+                    .orElseThrow(() -> new ClientException("用户登陆错误"));
+            return new UserLoginRespDTO(token);
         }
 
         String token = UUID.randomUUID().toString(true);
