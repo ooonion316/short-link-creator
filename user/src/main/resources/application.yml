@@ -17,3 +17,7 @@ mybatis-plus:
       logic-delete-field: delFlag
       logic-delete-value: 1
       logic-not-delete-value: 0
+
+short-link:
+  group:
+    max-num: 20

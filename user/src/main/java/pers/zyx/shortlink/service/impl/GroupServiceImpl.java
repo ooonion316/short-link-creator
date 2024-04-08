@@ -1,12 +1,14 @@
 package pers.zyx.shortlink.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,9 @@ import static pers.zyx.shortlink.constant.UserRedisKeyConstant.GROUP_CREATE_LOCK
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
     private final RedissonClient redissonClient;
 
+    @Value("${short-link.group.max-num}")
+    private Integer groupMaxNum;
+
     @Override
     public void saveGroup(String groupName) {
         this.saveGroup(UserContext.getUsername(), groupName);
@@ -39,6 +44,12 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
         RLock lock = redissonClient.getLock(String.format(GROUP_CREATE_LOCK, username));
         lock.lock();
         try {
+            LambdaQueryWrapper<GroupDO> queryWrapper = Wrappers.lambdaQuery(GroupDO.class)
+                    .eq(GroupDO::getUsername, username);
+            List<GroupDO> groupDOList = baseMapper.selectList(queryWrapper);
+            if (CollUtil.isNotEmpty(groupDOList) && groupDOList.size() == groupMaxNum) {
+                throw new ClientException(String.format("已超出最大分组数: %d", groupMaxNum));
+            }
             String gid = RandomUtil.randomString(6);
             while(hasGid(username, gid)) gid = RandomUtil.randomString(6);
             GroupDO groupDO = GroupDO.builder()
