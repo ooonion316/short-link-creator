@@ -35,6 +35,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pers.zyx.shortlink.config.GotoDomainWhileListConfiguration;
 import pers.zyx.shortlink.dao.entity.*;
 import pers.zyx.shortlink.dao.mapper.*;
 import pers.zyx.shortlink.dto.biz.ShortLinkStatsRecordDTO;
@@ -51,7 +52,6 @@ import pers.zyx.shortlink.service.LinkStatsTodayService;
 import pers.zyx.shortlink.util.HashUtil;
 import pers.zyx.shortlink.util.LinkUtil;
 
-import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.*;
@@ -60,8 +60,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static pers.zyx.shortlink.constant.LinkAccessStatsConstant.AMAP_REMOTE_URL;
-import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UIP_SHORT_LINK;
-import static pers.zyx.shortlink.constant.LinkAccessStatsRedisKeyConstant.UV_SHORT_LINK;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.ENABLE;
 import static pers.zyx.shortlink.constant.LinkEnableStatusConstant.PERMANENT;
 import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.*;
@@ -84,6 +82,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     private final LinkStatsTodayMapper linkStatsTodayMapper;
     private final LinkStatsTodayService linkStatsTodayService;
     private final DelayShortLinkStatsProducer delayShortLinkStatsProducer;
+    private final GotoDomainWhileListConfiguration gotoDomainWhileListConfiguration;
 
     @Value("${short-link.stats.locale.amap-key}")
     private String statsLocalAmapKey;
@@ -94,14 +93,17 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @Override
     @Transactional
     public ShortLinkCreateRespDTO createShortLink(ShortLinkCreateReqDTO requestParam) {
-        String suffix = generateSuffix(createShortLinkDefaultDomain, requestParam.getOriginUrl());
+        String originUrl = requestParam.getOriginUrl();
+        verificationWhileList(originUrl);
+
+        String suffix = generateSuffix(createShortLinkDefaultDomain, originUrl);
         if (suffix == "") throw new ClientException("访问人数过多, 请稍后再试");
 
         String fullShortUrl = createShortLinkDefaultDomain + "/" + suffix;
 
         LinkDO linkDO = BeanUtil.toBean(requestParam, LinkDO.class);
         linkDO.setDomain(createShortLinkDefaultDomain);
-        linkDO.setFavicon(getFavicon(requestParam.getOriginUrl()));
+        linkDO.setFavicon(getFavicon(originUrl));
         linkDO.setFullShortUrl(fullShortUrl);
         linkDO.setShortUri(suffix);
         linkDO.setEnableStatus(0);
@@ -608,5 +610,20 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             return null;
         }
         return null;
+    }
+
+    private void verificationWhileList(String originUrl) {
+        Boolean enable = gotoDomainWhileListConfiguration.getEnable();
+        if (enable == null || !enable) {
+            return;
+        }
+        String domain = LinkUtil.extractDomain(originUrl);
+        if (StrUtil.isBlank(domain)) {
+            throw new ClientException("跳转链接错误");
+        }
+        List<String> details = gotoDomainWhileListConfiguration.getDetails();
+        if (!details.contains(domain)) {
+            throw new ClientException("请生成以下网站的跳转链接:" + gotoDomainWhileListConfiguration.getNames());
+        }
     }
 }

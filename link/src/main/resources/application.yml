@@ -22,6 +22,15 @@ short-link:
       amap-key: 824c511f0997586ea016f979fdb23087
   domain:
     default: nurl.lnk
+  goto-domain:
+    while-list:
+      enable: true
+      names: '哔哩哔哩,知乎,掘金,博客园'
+      details:
+        - bilibili.com
+        - zhihu.com
+        - juejin.cn
+        - cnblogs.com
 
 mybatis-plus:
   configuration:

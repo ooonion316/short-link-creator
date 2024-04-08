@@ -2,8 +2,10 @@ package pers.zyx.shortlink.util;
 
 import cn.hutool.core.date.DateUnit;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import jakarta.servlet.http.HttpServletRequest;
 
+import java.net.URI;
 import java.util.Date;
 import java.util.Optional;
 
@@ -126,5 +128,28 @@ public class LinkUtil {
         String actualIp = getActualIp(request);
         // TODO 需要修改
         return actualIp.startsWith("192.168.") || actualIp.startsWith("10.") ? "WIFI" : "Mobile";
+    }
+
+    /**
+     * 获取原始链接中的域名
+     * 如果原始链接包含 www.自动删除
+     *
+     * @param originUrl 原始链接
+     * @return 原始链接域名
+     */
+    public static String extractDomain(String originUrl) {
+        String domain = null;
+        try {
+            URI uri = new URI(originUrl);
+            String host = uri.getHost();
+            if (StrUtil.isNotBlank(host)) {
+                domain = host;
+                if (domain.startsWith("www.")) {
+                    domain = host.substring(4);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return domain;
     }
 }
