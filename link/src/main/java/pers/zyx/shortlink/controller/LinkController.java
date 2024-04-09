@@ -1,5 +1,6 @@
 package pers.zyx.shortlink.controller;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -13,6 +14,7 @@ import pers.zyx.shortlink.dto.resp.ShortLinkBatchCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
+import pers.zyx.shortlink.handler.CustomBlockHandler;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.LinkService;
@@ -28,6 +30,11 @@ public class LinkController {
      * 创建短链接
      */
     @PostMapping("/api/short-link/v1/create")
+    @SentinelResource(
+            value = "create_short-link",
+            blockHandler = "createShortLinkBlockHandlerMethod",
+            blockHandlerClass = CustomBlockHandler.class
+    )
     public Result<ShortLinkCreateRespDTO> createShortLink(@RequestBody ShortLinkCreateReqDTO requestParam) {
         ShortLinkCreateRespDTO result = linkService.createShortLink(requestParam);
         return Results.success(result);
