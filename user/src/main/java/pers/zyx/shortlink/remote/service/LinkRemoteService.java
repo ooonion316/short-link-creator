@@ -19,17 +19,6 @@ import java.util.Map;
 public interface LinkRemoteService {
 
     /**
-     * 根据 URL 获取网站标题
-     *
-     * @param url 网站地址
-     * @return 网站标题
-     */
-    default Result<String> getTitleByUrl(@RequestParam("url") String url) {
-        String resultPageStr = HttpUtil.get("http://127.0.0.1:8001/api/short-link/v1/title?url=" + url);
-        return JSON.parseObject(resultPageStr, new TypeReference<>() {});
-    }
-
-    /**
      * 将链接移至回收站
      *
      * @param requestParam 请求参数

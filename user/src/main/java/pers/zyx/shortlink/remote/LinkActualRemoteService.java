@@ -1,14 +1,14 @@
 package pers.zyx.shortlink.remote;
 
+import cn.hutool.http.HttpUtil;
+import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
-import pers.zyx.shortlink.remote.req.ShortLinkBatchCreateReqDTO;
-import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
-import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
+import pers.zyx.shortlink.remote.req.*;
 import pers.zyx.shortlink.remote.resp.ShortLinkBatchCreateRespDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkCreateRespDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkGroupCountRespDTO;
@@ -78,4 +78,28 @@ public interface LinkActualRemoteService {
      */
     @GetMapping("/api/short-link/v1/title")
     Result<String> getTitleByUrl(@RequestParam("url") String url);
+
+    /**
+     * 将链接移至回收站
+     *
+     * @param requestParam 请求参数
+     */
+    @PostMapping("/api/short-link/v1/recycle-bin/save")
+    void saveRecycleBin(@RequestBody SaveRecycleBinReqDTO requestParam);
+
+    /**
+     * 将链接移出回收站
+     *
+     * @param requestParam 请求参数
+     */
+    @PostMapping("/api/short-link/v1/recycle-bin/recover")
+    void recoverRecycleBin(@RequestBody RecoverRecycleBinReqDTO requestParam);
+
+    /**
+     * 将链接从回收站中删除
+     *
+     * @param requestParam 请求参数
+     */
+    @PostMapping("/api/short-link/v1/recycle-bin/delete")
+    void deleteRecycleBin(@RequestBody DeleteRecycleBinReqDTO requestParam);
 }
