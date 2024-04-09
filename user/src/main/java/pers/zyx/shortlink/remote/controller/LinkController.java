@@ -10,10 +10,7 @@ import pers.zyx.shortlink.remote.req.ShortLinkBatchCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkPageReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
-import pers.zyx.shortlink.remote.resp.ShortLinkBaseInfoRespDTO;
-import pers.zyx.shortlink.remote.resp.ShortLinkBatchCreateRespDTO;
-import pers.zyx.shortlink.remote.resp.ShortLinkCreateRespDTO;
-import pers.zyx.shortlink.remote.resp.ShortLinkPageRespDTO;
+import pers.zyx.shortlink.remote.resp.*;
 import pers.zyx.shortlink.remote.service.LinkRemoteService;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
@@ -28,9 +25,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LinkController {
     private final LinkActualRemoteService linkActualRemoteService;
-
-    LinkRemoteService linkRemoteService = new LinkRemoteService() {
-    };
 
     /**
      * 中台调用创建短链接
@@ -68,5 +62,13 @@ public class LinkController {
     @GetMapping("/api/short-link/admin/v1/page")
     public Result<Page<ShortLinkPageRespDTO>> pageShortLink(ShortLinkPageReqDTO requestParam) {
         return linkActualRemoteService.pageShortLink(requestParam.getGid(), requestParam.getOrderTag(), requestParam.getCurrent(), requestParam.getSize());
+    }
+
+    /**
+     * 统计指定分组中短链接总量
+     */
+    @GetMapping("/api/short-link/admin/v1/count")
+    public Result<List<ShortLinkGroupCountRespDTO>> countGroupShortLink(@RequestParam("gids") List<String> gids) {
+        return linkActualRemoteService.countGroupShortLink(gids);
     }
 }

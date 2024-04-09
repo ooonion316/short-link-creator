@@ -19,6 +19,9 @@ import pers.zyx.shortlink.dto.req.GroupSortReqDTO;
 import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;
 import pers.zyx.shortlink.exception.ClientException;
+import pers.zyx.shortlink.remote.LinkActualRemoteService;
+import pers.zyx.shortlink.remote.resp.ShortLinkGroupCountRespDTO;
+import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.service.GroupService;
 
 import java.util.List;
@@ -29,6 +32,7 @@ import static pers.zyx.shortlink.constant.UserRedisKeyConstant.GROUP_CREATE_LOCK
 @Service
 @RequiredArgsConstructor
 public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implements GroupService {
+    private final LinkActualRemoteService linkActualRemoteService;
     private final RedissonClient redissonClient;
 
     @Value("${short-link.group.max-num}")
@@ -70,7 +74,18 @@ public class GroupServiceImpl extends ServiceImpl<GroupMapper, GroupDO> implemen
                 .eq(GroupDO::getUsername, UserContext.getUsername())
                 .orderByDesc(GroupDO::getSortOrder, GroupDO::getUpdateTime);
         List<GroupDO> groupDOList = baseMapper.selectList(lambdaQueryWrapper);
-        return BeanUtil.copyToList(groupDOList, GroupListRespDTO.class);
+
+        Result<List<ShortLinkGroupCountRespDTO>> listResult = linkActualRemoteService.countGroupShortLink(groupDOList.stream()
+                                                                                                                         .map(GroupDO::getGid)
+                                                                                                                         .toList());
+        List<GroupListRespDTO> shortLinkGroupCountRespDTOList = BeanUtil.copyToList(groupDOList, GroupListRespDTO.class);
+        shortLinkGroupCountRespDTOList.forEach(each -> {
+            Optional<ShortLinkGroupCountRespDTO> first = listResult.getData().stream()
+                    .filter(item -> item.getGid().equals(each.getGid()))
+                    .findFirst();
+            first.ifPresent(item -> each.setShortLinkCount(first.get().getShortLinkCount()));
+        });
+        return shortLinkGroupCountRespDTOList;
     }
 
     @Override

@@ -18,6 +18,11 @@ public class GroupListRespDTO {
     private String name;
 
     /**
+     * 短链接数量
+     */
+    private Integer shortLinkCount;
+
+    /**
      * 用户名
      */
     private String username;

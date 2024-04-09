@@ -11,8 +11,11 @@ import pers.zyx.shortlink.remote.req.ShortLinkCreateReqDTO;
 import pers.zyx.shortlink.remote.req.ShortLinkUpdateReqDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkBatchCreateRespDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkCreateRespDTO;
+import pers.zyx.shortlink.remote.resp.ShortLinkGroupCountRespDTO;
 import pers.zyx.shortlink.remote.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.result.Result;
+
+import java.util.List;
 
 @FeignClient("short-link-creator-link")
 public interface LinkActualRemoteService {
@@ -57,4 +60,13 @@ public interface LinkActualRemoteService {
                                                      @RequestParam("orderTag") String orderTag,
                                                      @RequestParam("current") Long current,
                                                      @RequestParam("size") Long size);
+
+    /**
+     * 查询分组短链接总量
+     *
+     * @param gids 分组标识
+     * @return 返回响应
+     */
+    @GetMapping("/api/short-link/v1/count")
+    Result<List<ShortLinkGroupCountRespDTO>> countGroupShortLink(@RequestParam("gids") List<String> gids);
 }
