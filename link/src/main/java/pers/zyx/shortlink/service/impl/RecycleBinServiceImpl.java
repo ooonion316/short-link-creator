@@ -1,6 +1,8 @@
 package pers.zyx.shortlink.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -12,6 +14,8 @@ import pers.zyx.shortlink.dao.mapper.RecycleBinMapper;
 import pers.zyx.shortlink.dto.req.DeleteRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.SaveRecycleBinReqDTO;
+import pers.zyx.shortlink.dto.req.ShortLinkRecycleBinPageReqDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.service.RecycleBinService;
 
 import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.GOTO_IS_NULL_SHORT_LINK;
@@ -64,5 +68,15 @@ public class RecycleBinServiceImpl extends ServiceImpl<RecycleBinMapper, LinkDO>
                 .build();
         linkDO.setDelFlag(1);
         baseMapper.update(linkDO, updateWrapper);
+    }
+
+    @Override
+    public IPage<ShortLinkPageRespDTO> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+        IPage<LinkDO> resultPage = baseMapper.pageRecycleBinLink(requestParam);
+        return resultPage.convert(each -> {
+            ShortLinkPageRespDTO result = BeanUtil.toBean(each, ShortLinkPageRespDTO.class);
+            result.setDomain("http://" + result.getDomain());
+            return result;
+        });
     }
 }

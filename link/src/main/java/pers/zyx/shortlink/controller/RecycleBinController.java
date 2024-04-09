@@ -1,13 +1,13 @@
 package pers.zyx.shortlink.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import pers.zyx.shortlink.dto.req.DeleteRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.dto.req.SaveRecycleBinReqDTO;
+import pers.zyx.shortlink.dto.req.ShortLinkRecycleBinPageReqDTO;
+import pers.zyx.shortlink.dto.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 import pers.zyx.shortlink.service.RecycleBinService;
@@ -43,5 +43,13 @@ public class RecycleBinController {
     public Result<Void> deleteRecycleBin(@RequestBody DeleteRecycleBinReqDTO requestParam) {
         recycleBinService.deleteRecycleBin(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 分页查询回收站内短链接
+     */
+    @GetMapping("/page")
+    public Result<IPage<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+        return Results.success(recycleBinService.pageShortLink(requestParam));
     }
 }
