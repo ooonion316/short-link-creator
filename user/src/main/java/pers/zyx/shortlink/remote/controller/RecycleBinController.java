@@ -1,6 +1,8 @@
 package pers.zyx.shortlink.remote.controller;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -8,7 +10,8 @@ import pers.zyx.shortlink.remote.LinkActualRemoteService;
 import pers.zyx.shortlink.remote.req.DeleteRecycleBinReqDTO;
 import pers.zyx.shortlink.remote.req.RecoverRecycleBinReqDTO;
 import pers.zyx.shortlink.remote.req.SaveRecycleBinReqDTO;
-import pers.zyx.shortlink.remote.service.LinkRemoteService;
+import pers.zyx.shortlink.remote.req.ShortLinkRecycleBinPageReqDTO;
+import pers.zyx.shortlink.remote.resp.ShortLinkPageRespDTO;
 import pers.zyx.shortlink.result.Result;
 import pers.zyx.shortlink.result.Results;
 
@@ -42,5 +45,13 @@ public class RecycleBinController {
     public Result<Void> deleteRecycleBin(@RequestBody DeleteRecycleBinReqDTO requestParam) {
         linkActualRemoteService.deleteRecycleBin(requestParam);
         return Results.success();
+    }
+
+    /**
+     * 查询回收站内短链接
+     */
+    @GetMapping("/api/short-link/admin/v1/recycle-bin/page")
+    public Result<Page<ShortLinkPageRespDTO>> pageShortLink(ShortLinkRecycleBinPageReqDTO requestParam) {
+        return linkActualRemoteService.pageRecycleBinShortLink(requestParam.getGidList(), requestParam.getCurrent(), requestParam.getSize());
     }
 }

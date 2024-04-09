@@ -1,7 +1,5 @@
 package pers.zyx.shortlink.remote;
 
-import cn.hutool.http.HttpUtil;
-import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -102,4 +100,12 @@ public interface LinkActualRemoteService {
      */
     @PostMapping("/api/short-link/v1/recycle-bin/delete")
     void deleteRecycleBin(@RequestBody DeleteRecycleBinReqDTO requestParam);
+
+    /**
+     * 查询回收站内短链接
+     */
+    @GetMapping("/api/short-link/v1/recycle-bin/page")
+    Result<Page<ShortLinkPageRespDTO>> pageRecycleBinShortLink(@RequestParam("gidList") List<String> gidList,
+                                                               @RequestParam("current") Long current,
+                                                               @RequestParam("size") Long size);
 }
