@@ -69,4 +69,13 @@ public interface LinkActualRemoteService {
      */
     @GetMapping("/api/short-link/v1/count")
     Result<List<ShortLinkGroupCountRespDTO>> countGroupShortLink(@RequestParam("gids") List<String> gids);
+
+    /**
+     * 根据 URL 获取网站标题
+     *
+     * @param url 网站地址
+     * @return 网站标题
+     */
+    @GetMapping("/api/short-link/v1/title")
+    Result<String> getTitleByUrl(@RequestParam("url") String url);
 }
