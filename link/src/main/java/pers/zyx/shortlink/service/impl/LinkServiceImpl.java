@@ -170,6 +170,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
             throw new ClientException("短链接不存在");
         }
 
+        verificationWhileList(requestParam.getOriginUrl());
+
         // Gid 是否一致, 一致直接修改, 否则先删除再添加
         if (Objects.equals(hasShortLinkDO.getGid(), requestParam.getGid())) {
             LambdaUpdateWrapper<LinkDO> updateWrapper = Wrappers.lambdaUpdate(LinkDO.class)
