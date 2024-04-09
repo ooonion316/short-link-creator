@@ -588,7 +588,7 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     public String generateSuffix(String domain, String originUrl) {
         String suffix = "";
         for(int i = 0; i < 10; i++) {
-            suffix = originUrl + System.currentTimeMillis();
+            suffix = originUrl + UUID.randomUUID().toString(true);
             suffix = HashUtil.hashToBase62(suffix);
             if (!shortLinkBloomFilter.contains(domain + "/" + suffix)) break;
         }
