@@ -122,6 +122,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
         } catch (DuplicateKeyException ex) {
             log.warn("短链接 {} 重复入库", fullShortUrl);
         }
+        stringRedisTemplate.opsForValue().set(String.format(GOTO_SHORT_LINK, fullShortUrl), linkDO.getOriginUrl(),
+                LinkUtil.getLinkCacheValidDate(linkDO.getValidDate()), TimeUnit.MILLISECONDS);
         shortLinkBloomFilter.add(fullShortUrl);
 
         String resultUrl = "http://" + linkDO.getDomain() + ":8001" + "/" + linkDO.getShortUri();
