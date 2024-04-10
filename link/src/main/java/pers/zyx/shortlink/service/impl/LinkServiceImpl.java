@@ -324,7 +324,8 @@ public class LinkServiceImpl extends ServiceImpl<LinkMapper, LinkDO> implements 
     @SneakyThrows
     public void restoreUri(String shortUri, HttpServletRequest request, HttpServletResponse response) {
         String serverName = request.getServerName();
-        String fullShortUrl = serverName + "/" + shortUri;
+        int serverPort = request.getServerPort();
+        String fullShortUrl = serverName + ":" + serverPort + "/" + shortUri;
         // 判断布隆过滤器
         if (!shortLinkBloomFilter.contains(fullShortUrl)) {
             response.sendRedirect("/page/notfound");
