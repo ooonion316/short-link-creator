@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import pers.zyx.shortlink.remote.LinkActualRemoteService;
-import pers.zyx.shortlink.remote.service.LinkRemoteService;
 import pers.zyx.shortlink.result.Result;
 
 @RestController
