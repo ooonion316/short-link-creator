@@ -22,39 +22,14 @@ import java.util.Objects;
 @Order(0)
 @RequiredArgsConstructor
 public class UserInterception implements HandlerInterceptor {
-    private final StringRedisTemplate stringRedisTemplate;
-
-    private static final String USER_LOGIN_PREFIX = "short-link:logged_in:";
-
-    private static final List<String> EXCLUDE_URLS = Arrays.asList("/api/short-link/admin/v1/user",
-                                                                   "/api/short-link/admin/v1/user/has-username",
-                                                                   "/api/short-link/admin/v1/user/login");
-
-    private static final List<String> EXCLUDE_METHODS = Arrays.asList("POST", "GET", "POST");
-
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
-        String method = request.getMethod();
-        String requestURI = request.getRequestURI();
-        for (int i = 0; i < EXCLUDE_URLS.size(); i++) {
-            if ((StrUtil.equals(method, EXCLUDE_METHODS.get(i))) && (StrUtil.equals(requestURI, EXCLUDE_URLS.get(i)))) {
-                return true;
-            }
-        }
-
         String username = request.getHeader("username");
-        String token = request.getHeader("token");
-        Object userInfo = null;
-        try {
-            userInfo = stringRedisTemplate.opsForHash().get(USER_LOGIN_PREFIX + username, token);
-        } catch (Exception e) {
-            throw new ClientException("用户名不存在");
-        }
-        if (Objects.nonNull(userInfo)) {
-            UserInfoDTO userInfoDTO = JSON.parseObject(userInfo.toString(), UserInfoDTO.class);
+        if(StrUtil.isNotBlank(username)) {
+            String userId = request.getHeader("userId");
+            String realName = request.getHeader("realName");
+            UserInfoDTO userInfoDTO = new UserInfoDTO(userId, username, realName);
             UserContext.setUser(userInfoDTO);
-        } else {
-            throw new ClientException("用户未登录");
         }
         return true;
     }

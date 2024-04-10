@@ -16,7 +16,7 @@ public class MvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new UserInterception(stringRedisTemplate));
+        registry.addInterceptor(new UserInterception());
         registry.addInterceptor(new UserFlowRiskControlInterceptor(stringRedisTemplate, userFlowRiskControlConfiguration));
     }
 }
