@@ -42,9 +42,6 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
             return null;
         }
 
-        requestParam.setStartDate(requestParam.getStartDate() + " 00:00:00");
-        requestParam.setEndDate(requestParam.getEndDate() + " 23:59:59");
-
         // 基础访问数据
         LinkAccessStatsDO pvUvUipStatsByShortLink = linkAccessLogsMapper.findPvUvUipStatsByShortLink(requestParam);
         // 基础访问详情
@@ -414,8 +411,6 @@ public class ShortLinkStatsServiceImpl implements ShortLinkStatsService {
 
     @Override
     public IPage<ShortLinkStatsAccessRecordRespDTO> shortLinkStatsAccessRecord(ShortLinkStatsAccessRecordReqDTO requestParam) {
-        requestParam.setStartDate(requestParam.getStartDate() + " 00:00:00");
-        requestParam.setEndDate(requestParam.getEndDate() + " 23:59:59");
         LambdaQueryWrapper<LinkAccessLogsDO> queryWrapper = Wrappers.lambdaQuery(LinkAccessLogsDO.class)
                 .eq(LinkAccessLogsDO::getGid, requestParam.getGid())
                 .eq(LinkAccessLogsDO::getFullShortUrl, requestParam.getFullShortUrl())
