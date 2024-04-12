@@ -1,12 +1,14 @@
 package pers.zyx.shortlink.mq.consumer;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RBlockingDeque;
 import org.redisson.api.RDelayedQueue;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.stereotype.Component;
 import pers.zyx.shortlink.dto.biz.ShortLinkStatsRecordDTO;
+import pers.zyx.shortlink.mq.idempotent.MessageQueueIdempotentHandler;
 import pers.zyx.shortlink.service.LinkService;
 
 import java.util.concurrent.Executors;
@@ -17,10 +19,11 @@ import static pers.zyx.shortlink.constant.LinkGotoRedisKeyConstant.DELAY_QUEUE_S
 /**
  * 延迟记录短链接统计组件
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class DelayShortLinkStatsConsumer implements InitializingBean {
-
+    private final MessageQueueIdempotentHandler messageQueueIdempotentHandler;
     private final RedissonClient redissonClient;
     private final LinkService linkService;
 
@@ -39,7 +42,18 @@ public class DelayShortLinkStatsConsumer implements InitializingBean {
                         try {
                             ShortLinkStatsRecordDTO statsRecord = delayedQueue.poll();
                             if (statsRecord != null) {
-                                linkService.shortLinkStats(null, null, statsRecord);
+                                if (messageQueueIdempotentHandler.isMessageProcessed(statsRecord.getKeys())) {
+                                    if (messageQueueIdempotentHandler.isAccomplish(statsRecord.getKeys())) {
+                                        return;
+                                    }
+                                }
+                                try {
+                                    linkService.shortLinkStats(null, null, statsRecord);
+                                } catch (Throwable ex) {
+                                    messageQueueIdempotentHandler.delMessageProcessed(statsRecord.getKeys());
+                                    log.error("延迟记录短链接监控消费异常", ex);
+                                }
+                                messageQueueIdempotentHandler.setAccomplish(statsRecord.getKeys());
                                 continue;
                             }
                             LockSupport.parkUntil(500);
