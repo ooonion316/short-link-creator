@@ -14,7 +14,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
 import pers.zyx.shortlink.biz.user.UserContext;
 import pers.zyx.shortlink.dao.entity.GroupDO;
-import pers.zyx.shortlink.dao.mapper.GroupMapper;
+import pers.zyx.shortlink.mapper.GroupMapper;
 import pers.zyx.shortlink.dto.req.GroupSortReqDTO;
 import pers.zyx.shortlink.dto.req.GroupUpdateReqDTO;
 import pers.zyx.shortlink.dto.resp.GroupListRespDTO;

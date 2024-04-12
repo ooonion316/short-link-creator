@@ -14,6 +14,7 @@
         <module>gateway</module>
         <module>link</module>
         <module>framework</module>
+        <module>aggregation</module>
     </modules>
 
     <properties>

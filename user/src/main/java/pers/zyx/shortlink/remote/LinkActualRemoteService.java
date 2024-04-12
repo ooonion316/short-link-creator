@@ -14,7 +14,7 @@ import pers.zyx.shortlink.result.Result;
 import java.util.List;
 import java.util.Map;
 
-@FeignClient("short-link-creator-link")
+@FeignClient(value = "short-link-creator-link", url = "${aggregation.remote-url:}")
 public interface LinkActualRemoteService {
 
     /**

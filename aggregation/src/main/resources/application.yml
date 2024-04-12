@@ -1,0 +1,54 @@
+server:
+  port: 8003
+
+spring:
+  application:
+    name: short-link-creator-aggregation
+  datasource:
+    driver-class-name: org.apache.shardingsphere.driver.ShardingSphereDriver
+    url: jdbc:shardingsphere:classpath:shardingsphere-config-dev.yaml
+
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+
+  mvc:
+    view:
+      prefix: /templates/
+      suffix: .html
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
+
+aggregation:
+  remote-url: http://127.0.0.1:${server.port}
+
+short-link:
+  stats:
+    locale:
+      amap-key: 824c511f0997586ea016f979fdb23087
+  domain:
+    default: nurl.lnk:8003
+  group:
+    max-num: 20
+  goto-domain:
+    while-list:
+      enable: true
+      names: '哔哩哔哩,知乎,掘金,博客园'
+      details:
+        - bilibili.com
+        - zhihu.com
+        - juejin.cn
+        - cnblogs.com
+  flow-limit:
+    enable: true
+    time-window: 1
+    max-access-count: 20
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  mapper-locations: classpath:mapper/*.xml
