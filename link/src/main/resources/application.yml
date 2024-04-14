@@ -16,6 +16,16 @@ spring:
         short-link-stats: 'short_link:stats-stream'
         short-link-stats-group: 'short_link:stats-stream:only-group'
 
+rocketmq:
+  name-server: 127.0.0.1:9876
+  producer:
+    group: short-link_project-service_stats-save_pg
+    topic: short-link_project-service_topic
+    send-message-timeout: 2000
+    retry-times-when-send-failed: 1
+    retry-times-when-send-async-failed: 1
+  consumer:
+    group: short-link_project-service_stats-save_cg
 
   mvc:
     view:
